@@ -237,6 +237,43 @@ func (t *TLSClient) Client() *http.Client {
 	return &http.Client{Transport: tr}
 }
 
+// BasicAuthTransport is an http.RoundTripper that authenticates all requests
+// using HTTP Basic Authentication with the provided username and password.  It
+// additionally supports users who have two-factor authentication enabled on
+// their GitHub account.
+type BasicAuthTransport struct {
+	Username string // GitHub username
+	Password string // GitHub password
+	// OTP      string // one-time password for users with two-factor auth enabled
+
+	// Transport is the underlying HTTP transport to use when making requests.
+	// It will default to http.DefaultTransport if nil.
+	Transport http.RoundTripper
+}
+
+// RoundTrip implements the RoundTripper interface.
+func (t *BasicAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// req = cloneRequest(req) // per RoundTrip contract
+	req.SetBasicAuth(t.Username, t.Password)
+	// if t.OTP != "" {
+	// req.Header.Add(headerOTP, t.OTP)
+	// }
+	return t.transport().RoundTrip(req)
+}
+
+// Client returns an *http.Client that makes requests that are authenticated
+// using HTTP Basic Authentication.
+func (t *BasicAuthTransport) Client() *http.Client {
+	return &http.Client{Transport: t}
+}
+
+func (t *BasicAuthTransport) transport() http.RoundTripper {
+	if t.Transport != nil {
+		return t.Transport
+	}
+	return http.DefaultTransport
+}
+
 func Logon() (un, pw string) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter username: ")

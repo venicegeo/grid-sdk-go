@@ -1,6 +1,12 @@
 package grid
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+	"log"
+	"mime"
+	"os"
+)
 
 // ExportService handles communication with the Export related
 // methods of the GRiD API.
@@ -28,4 +34,23 @@ func (s *ExportService) ListByPk(pk int) ([]File, *Response, error) {
 	exportDetail := new(ExportDetail)
 	resp, err := s.client.Do(req, exportDetail)
 	return exportDetail.ExportFiles, resp, err
+}
+
+func (s *ExportService) DownloadByPk(pk int) (*Response, error) {
+	url := fmt.Sprintf("export/download/file/%v/", pk)
+
+	req, err := s.client.NewRequest("GET", url, nil)
+
+	var foo interface{}
+	resp, err := s.client.Do(req, foo)
+
+	cd := resp.Header.Get("Content-Disposition")
+	_, params, err := mime.ParseMediaType(cd)
+	fname := params["filename"]
+	file, err := os.Create(fname)
+	defer file.Close()
+
+	numBytes, err := io.Copy(file, resp.Body)
+	log.Println("Downloaded", numBytes, "bytes to", fname)
+	return resp, err
 }

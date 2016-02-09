@@ -298,8 +298,8 @@ func GetAuth() string {
 	return line
 }
 
-func Check(e error) {
-	if e != nil {
-		log.Fatal(e)
-	}
-}
+// func Check(e error) {
+// 	if e != nil {
+// 		log.Fatal(e)
+// 	}
+// }

@@ -46,13 +46,13 @@ func (s *AOIService) List(geom string) ([]AOI, *Response, error) {
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
-	authstr := GetAuth()
-	if authstr == "" {
-		un, pw := Logon()
-		req.SetBasicAuth(un, pw)
-	} else {
-		req.Header.Add("authorization", "Basic "+authstr)
-	}
+	// authstr := GetAuth()
+	// if authstr == "" {
+	// 	un, pw := Logon()
+	// 	req.SetBasicAuth(un, pw)
+	// } else {
+	// 	req.Header.Add("authorization", "Basic "+authstr)
+	// }
 	aoiList := new(AOIList)
 	resp, err := s.client.Do(req, aoiList)
 	return aoiList.AOIs, resp, err
@@ -63,13 +63,13 @@ func (s *AOIService) ListByPk(pk int) ([]Export, *Response, error) {
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
-	authstr := GetAuth()
-	if authstr == "" {
-		un, pw := Logon()
-		req.SetBasicAuth(un, pw)
-	} else {
-		req.Header.Add("authorization", "Basic "+authstr)
-	}
+	// authstr := GetAuth()
+	// if authstr == "" {
+	// 	un, pw := Logon()
+	// 	req.SetBasicAuth(un, pw)
+	// } else {
+	// 	req.Header.Add("authorization", "Basic "+authstr)
+	// }
 	aoiDetail := new(AOIDetail)
 	resp, err := s.client.Do(req, aoiDetail)
 	return aoiDetail.ExportSet, resp, err

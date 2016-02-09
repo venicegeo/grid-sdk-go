@@ -5,7 +5,9 @@ import "fmt"
 // AOIService handles communication with the AOI related
 // methods of the GRiD API.
 //
-// GRiD API docs: https://github.com/CRREL/GRiD-API/blob/v0.0/composed_api.rst#get-a-users-aoi-list
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/v0.0/composed_api.rst#get-a-users-aoi-list
+// https://github.com/CRREL/GRiD-API/blob/v0.0/composed_api.rst#get-aoi-details
 type AOIService struct {
 	client *Client
 }

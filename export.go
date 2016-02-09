@@ -43,6 +43,7 @@ func (s *ExportService) DownloadByPk(pk int) (*Response, error) {
 
 	var foo interface{}
 	resp, err := s.client.Do(req, foo)
+	defer resp.Body.Close()
 
 	cd := resp.Header.Get("Content-Disposition")
 	_, params, err := mime.ParseMediaType(cd)

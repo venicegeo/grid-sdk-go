@@ -1,5 +1,7 @@
 package grid
 
+import "fmt"
+
 // AOIService handles communication with the AOI related
 // methods of the GRiD API.
 //
@@ -23,6 +25,20 @@ type AOIList struct {
 	AOIs []AOI `json:"self_aoi_list"`
 }
 
+type Export struct {
+	Status    string `json:"status,omitempty"`
+	StartedAt string `json:"stated_at,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Datatype  string `json:"datatype,omitempty"`
+	HSRS      int    `json:"hsrs,omitempty"`
+	URL       string `json:"url,omitempty"`
+	Pk        int    `json:"pk,omitempty"`
+}
+
+type AOIDetail struct {
+	ExportSet []Export `json:"export_set"`
+}
+
 func (s *AOIService) List(geom string) ([]AOI, *Response, error) {
 	url := "api/v0/aoi/"
 
@@ -44,4 +60,27 @@ func (s *AOIService) List(geom string) ([]AOI, *Response, error) {
 	// err = json.Unmarshal([]byte(aois), &a)
 	// Check(err)
 	return aoiList.AOIs, resp, err
+}
+
+func (s *AOIService) ListByPk(pk int) ([]Export, *Response, error) {
+	url := fmt.Sprintf("api/v0/aoi/%v/", pk)
+
+	req, err := s.client.NewRequest("GET", url, nil)
+
+	authstr := GetAuth()
+	if authstr == "" {
+		un, pw := Logon()
+		req.SetBasicAuth(un, pw)
+	} else {
+		req.Header.Add("authorization", "Basic "+authstr)
+	}
+	aoiDetail := new(AOIDetail)
+	resp, err := s.client.Do(req, aoiDetail)
+	// aois, err := ioutil.ReadAll(resp.Body)
+	// resp.Body.Close()
+	// Check(err)
+	// a := &AOIList{}
+	// err = json.Unmarshal([]byte(aois), &a)
+	// Check(err)
+	return aoiDetail.ExportSet, resp, err
 }

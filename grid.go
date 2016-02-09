@@ -239,47 +239,6 @@ func (t *TLSClient) Client() *http.Client {
 	return &http.Client{Transport: tr}
 }
 
-type exportSet struct {
-	Status    string `json:"status"`
-	StartedAt string `json:"stated_at"`
-	Name      string `json:"name"`
-	Datatype  string `json:"datatype"`
-	HSRS      int    `json:"hsrs"`
-	URL       string `json:"url"`
-	Pk        int    `json:"pk"`
-}
-
-type aoiDetail struct {
-	ExportSet []exportSet `json:"export_set"`
-}
-
-func GetAOIDetail(pk int) aoiDetail {
-	url := "api/v0/aoi/"
-
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
-
-	req, err := http.NewRequest("GET", url+strconv.Itoa(pk)+"/", nil)
-
-	authstr := GetAuth()
-	if authstr == "" {
-		un, pw := Logon()
-		req.SetBasicAuth(un, pw)
-	} else {
-		req.Header.Add("authorization", "Basic "+authstr)
-	}
-	resp, err := client.Do(req)
-	exports, err := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
-	Check(err)
-	a := &aoiDetail{}
-	err = json.Unmarshal([]byte(exports), &a)
-	Check(err)
-	return *a
-}
-
 type exportFiles struct {
 	URL  string `json:"url"`
 	Pk   int    `json:"pk"`

@@ -211,32 +211,6 @@ type Error struct {
 	Code     string `json:"code"`     // validation error code
 }
 
-/*
-UnauthenticatedRateLimitedTransport allows you to make unauthenticated calls
-that need to use a higher rate limit associated with your OAuth application.
-	t := &github.UnauthenticatedRateLimitedTransport{
-		ClientID:     "your app's client ID",
-		ClientSecret: "your app's client secret",
-	}
-	client := github.NewClient(t.Client())
-This will append the querystring params client_id=xxx&client_secret=yyy to all
-requests.
-See http://developer.github.com/v3/#unauthenticated-rate-limited-requests for
-more information.
-*/
-type TLSClient struct {
-	Transport http.Transport
-}
-
-// Client returns an *http.Client that makes requests which are subject to the
-// rate limit of your OAuth application.
-func (t *TLSClient) Client() *http.Client {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	return &http.Client{Transport: tr}
-}
-
 // BasicAuthTransport is an http.RoundTripper that authenticates all requests
 // using HTTP Basic Authentication with the provided username and password.  It
 // additionally supports users who have two-factor authentication enabled on

@@ -2,7 +2,6 @@ package grid
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"mime"
 	"os"
@@ -41,8 +40,12 @@ func (s *ExportService) DownloadByPk(pk int) (*Response, error) {
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
-	var foo interface{}
-	resp, err := s.client.Do(req, foo)
+	file, err := os.Create("temp")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	resp, err := s.client.Do(req, file)
 	if err != nil {
 		panic(err)
 	}
@@ -54,16 +57,17 @@ func (s *ExportService) DownloadByPk(pk int) (*Response, error) {
 		panic(err)
 	}
 	fname := params["filename"]
-	file, err := os.Create(fname)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	numBytes, err := io.Copy(file, resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	log.Println("Downloaded", numBytes, "bytes to", fname)
+	log.Println(fname)
+	// file, err := os.Create(fname)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer file.Close()
+	//
+	// numBytes, err := io.Copy(file, resp.Body)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// log.Println("Downloaded", numBytes, "bytes to", fname)
 	return resp, err
 }

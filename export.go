@@ -55,19 +55,6 @@ func (s *ExportService) DownloadByPk(pk int) (*Response, error) {
 	if err != nil {
 		panic(err)
 	}
-	// fname := params["filename"]
 	os.Rename(file.Name(), params["filename"])
-	// log.Println(fname)
-	// file, err := os.Create(fname)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer file.Close()
-	//
-	// numBytes, err := io.Copy(file, resp.Body)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// log.Println("Downloaded", numBytes, "bytes to", fname)
 	return resp, err
 }

@@ -43,15 +43,27 @@ func (s *ExportService) DownloadByPk(pk int) (*Response, error) {
 
 	var foo interface{}
 	resp, err := s.client.Do(req, foo)
+	if err != nil {
+		panic(err)
+	}
 	defer resp.Body.Close()
 
 	cd := resp.Header.Get("Content-Disposition")
 	_, params, err := mime.ParseMediaType(cd)
+	if err != nil {
+		panic(err)
+	}
 	fname := params["filename"]
 	file, err := os.Create(fname)
+	if err != nil {
+		panic(err)
+	}
 	defer file.Close()
 
 	numBytes, err := io.Copy(file, resp.Body)
+	if err != nil {
+		panic(err)
+	}
 	log.Println("Downloaded", numBytes, "bytes to", fname)
 	return resp, err
 }

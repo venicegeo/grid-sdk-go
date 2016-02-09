@@ -55,12 +55,6 @@ func (s *AOIService) List(geom string) ([]AOI, *Response, error) {
 	}
 	aoiList := new(AOIList)
 	resp, err := s.client.Do(req, aoiList)
-	// aois, err := ioutil.ReadAll(resp.Body)
-	// resp.Body.Close()
-	// Check(err)
-	// a := &AOIList{}
-	// err = json.Unmarshal([]byte(aois), &a)
-	// Check(err)
 	return aoiList.AOIs, resp, err
 }
 
@@ -78,11 +72,5 @@ func (s *AOIService) ListByPk(pk int) ([]Export, *Response, error) {
 	}
 	aoiDetail := new(AOIDetail)
 	resp, err := s.client.Do(req, aoiDetail)
-	// aois, err := ioutil.ReadAll(resp.Body)
-	// resp.Body.Close()
-	// Check(err)
-	// a := &AOIList{}
-	// err = json.Unmarshal([]byte(aois), &a)
-	// Check(err)
 	return aoiDetail.ExportSet, resp, err
 }

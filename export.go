@@ -2,7 +2,6 @@ package grid
 
 import (
 	"fmt"
-	"log"
 	"mime"
 	"os"
 )
@@ -56,8 +55,9 @@ func (s *ExportService) DownloadByPk(pk int) (*Response, error) {
 	if err != nil {
 		panic(err)
 	}
-	fname := params["filename"]
-	log.Println(fname)
+	// fname := params["filename"]
+	os.Rename(file.Name(), params["filename"])
+	// log.Println(fname)
 	// file, err := os.Create(fname)
 	// if err != nil {
 	// 	panic(err)

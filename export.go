@@ -25,13 +25,6 @@ func (s *ExportService) ListByPk(pk int) ([]File, *Response, error) {
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
-	authstr := GetAuth()
-	if authstr == "" {
-		un, pw := Logon()
-		req.SetBasicAuth(un, pw)
-	} else {
-		req.Header.Add("authorization", "Basic "+authstr)
-	}
 	exportDetail := new(ExportDetail)
 	resp, err := s.client.Do(req, exportDetail)
 	return exportDetail.ExportFiles, resp, err

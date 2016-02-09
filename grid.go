@@ -297,9 +297,3 @@ func GetAuth() string {
 	line, err := reader.ReadString('\n')
 	return line
 }
-
-// func Check(e error) {
-// 	if e != nil {
-// 		log.Fatal(e)
-// 	}
-// }

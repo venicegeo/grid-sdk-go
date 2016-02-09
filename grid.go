@@ -1,21 +1,14 @@
 package grid
 
 import (
-	"bufio"
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
-	"os"
-	"path/filepath"
-	"strings"
-
-	"github.com/howeyc/gopass"
 )
 
 const (
@@ -246,28 +239,4 @@ func (t *BasicAuthTransport) transport() http.RoundTripper {
 		return t.Transport
 	}
 	return http.DefaultTransport
-}
-
-func Logon() (un, pw string) {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter username: ")
-	un, _ = reader.ReadString('\n')
-	un = strings.TrimSpace(un)
-	fmt.Print("Enter password: ")
-	pass := gopass.GetPasswd()
-	pw = string(pass)
-	return
-}
-
-func GetAuth() string {
-	path := os.Getenv("HOME") + string(filepath.Separator) + ".grid"
-	fileandpath := path + string(filepath.Separator) + "credentials"
-	file, err := os.Open(fileandpath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	reader := bufio.NewReader(file)
-	line, err := reader.ReadString('\n')
-	return line
 }

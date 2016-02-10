@@ -55,6 +55,6 @@ func (s *ExportService) DownloadByPk(pk int) (*Response, error) {
 	if err != nil {
 		panic(err)
 	}
-	os.Rename(file.Name(), params["filename"])
+	err = os.Rename(file.Name(), params["filename"])
 	return resp, err
 }

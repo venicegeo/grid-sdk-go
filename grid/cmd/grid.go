@@ -50,9 +50,10 @@ func Execute() {
 
 // AddCommands adds child commands to the root GridCmd.
 func AddCommands() {
+	GridCmd.AddCommand(configureCmd)
+	GridCmd.AddCommand(lookupCmd)
 	GridCmd.AddCommand(lsCmd)
 	GridCmd.AddCommand(pullCmd)
-	GridCmd.AddCommand(configureCmd)
 	GridCmd.AddCommand(versionCmd)
 }
 

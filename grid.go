@@ -27,8 +27,9 @@ type Client struct {
 	BaseURL *url.URL
 
 	// Services used for talking to different parts of the GRiD API.
-	AOI    *AOIService
-	Export *ExportService
+	AOI      *AOIService
+	Export   *ExportService
+	Geonames *GeonamesService
 }
 
 // NewClient returns a new GRiD API client.  If a nil httpClient is
@@ -48,6 +49,7 @@ func NewClient(httpClient *http.Client) *Client {
 	c := &Client{client: httpClient, transport: tr, BaseURL: baseURL}
 	c.AOI = &AOIService{client: c}
 	c.Export = &ExportService{client: c}
+	c.Geonames = &GeonamesService{client: c}
 	return c
 }
 

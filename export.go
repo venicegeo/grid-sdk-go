@@ -14,24 +14,35 @@ type ExportService struct {
 	client *Client
 }
 
-type File struct {
-	URL  string `json:"url"`
-	Pk   int    `json:"pk"`
-	Name string `json:"name"`
+type ExportFile struct {
+	URL  string `json:"url,omitempty"`
+	Pk   int    `json:"pk,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
-type ExportDetail struct {
-	ExportFiles []File `json:"exportfiles"`
+type TDA struct {
+	Status    string `json:"status,omitempty"`
+	TDAType   string `json:"tda_type,omitempty"`
+	Name      string `json:"name,omitempty"`
+	URL       string `json:"url,omitempty"`
+	CreatedAt string `json:"created_at,omitempty"`
+	Pk        int    `json:"pk,omitempty"`
+	Notes     string `json:"notes,omitempty"`
 }
 
-func (s *ExportService) ListByPk(pk int) ([]File, *Response, error) {
-	url := fmt.Sprintf("api/v0/export/%v/", pk)
+type ExportResponse struct {
+	ExportFiles []ExportFile `json:"exportfiles,omitempty"`
+	TDASet      []TDA        `json:"tda_set,omitempty"`
+}
+
+func (s *ExportService) ListByPk(pk int) (*ExportResponse, *Response, error) {
+	url := fmt.Sprintf("api/v1/export/%v/?source=toasted_filament", pk)
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
-	exportDetail := new(ExportDetail)
+	exportDetail := new(ExportResponse)
 	resp, err := s.client.Do(req, exportDetail)
-	return exportDetail.ExportFiles, resp, err
+	return exportDetail, resp, err
 }
 
 func (s *ExportService) DownloadByPk(pk int) (*Response, error) {

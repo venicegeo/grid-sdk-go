@@ -30,10 +30,12 @@ func GetAOIs(cmd *cobra.Command, args []string) {
 	w := new(tabwriter.Writer)
 
 	w.Init(os.Stdout, 0, 8, 3, '\t', 0)
-	fmt.Fprintln(w, "CREATED AT\tPRIMARY KEY\tNAME\tNUMBER OF EXPORTS")
+	fmt.Fprintln(w, "PRIMARY KEY\tNAME\tCREATED AT")
 
-	for _, v := range a {
-		fmt.Fprintf(w, "%v\t%d\t%s\t%s\n", v.CreatedAt, v.Pk, v.Name, v.NumExports)
+	for _, v := range *a {
+		for _, v := range v.AOIs {
+			fmt.Fprintf(w, "%v\t%v\t%v\n", v.Pk, v.Fields.Name, v.Fields.CreatedAt)
+		}
 	}
 
 	w.Flush()

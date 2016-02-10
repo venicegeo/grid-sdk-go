@@ -34,10 +34,10 @@ func GetExports(cmd *cobra.Command, args []string) {
 	w := new(tabwriter.Writer)
 
 	w.Init(os.Stdout, 0, 8, 3, '\t', 0)
-	fmt.Fprintln(w, "STARTED AT\tNAME\tDATATYPE\tPRIMARY KEY")
+	fmt.Fprintln(w, "PRIMARY KEY\tNAME\tDATATYPE\tSTARTED AT")
 
-	for _, v := range a {
-		fmt.Fprintf(w, "%v\t%s\t%s\t%d\n", v.StartedAt, v.Name, v.Datatype, v.Pk)
+	for _, v := range a.ExportSet {
+		fmt.Fprintf(w, "%v\t%v\t%v\t%v\n", v.Pk, v.Name, v.Datatype, v.StartedAt)
 	}
 
 	w.Flush()

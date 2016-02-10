@@ -12,51 +12,69 @@ type AOIService struct {
 	client *Client
 }
 
-type AOI struct {
-	Name       string `json:"name,omitempty"`
-	Geometry   string `json:"geometry,omitempty"`
-	Notes      string `json:"notes,omitempty"`
-	IsActive   bool   `json:"is_active,omitempty"`
-	Source     string `json:"source,omitempty"`
-	NumExports string `json:"num_exports,omitempty"`
-	Pk         int    `json:"pk,omitempty"`
-	CreatedAt  string `json:"created_at,omitempty"`
-}
-
-type AOIList struct {
-	AOIs []AOI `json:"self_aoi_list"`
-}
-
 type Export struct {
 	Status    string `json:"status,omitempty"`
-	StartedAt string `json:"stated_at,omitempty"`
 	Name      string `json:"name,omitempty"`
 	Datatype  string `json:"datatype,omitempty"`
-	HSRS      int    `json:"hsrs,omitempty"`
+	HSRS      string `json:"hsrs,omitempty"`
 	URL       string `json:"url,omitempty"`
 	Pk        int    `json:"pk,omitempty"`
+	StartedAt string `json:"started_at,omitempty"`
 }
 
-type AOIDetail struct {
-	ExportSet []Export `json:"export_set"`
+type RasterCollect struct {
+	Datatype string `json:"datatype,omitempty"`
+	Pk       int    `json:"pk,omitempty"`
+	Name     string `json:"name,omitempty"`
 }
 
-func (s *AOIService) List(geom string) ([]AOI, *Response, error) {
-	url := "api/v0/aoi/"
+type PointcloudCollect struct {
+	Datatype string `json:"datatype,omitempty"`
+	Pk       int    `json:"pk,omitempty"`
+	Name     string `json:"name,omitempty"`
+}
+
+type Fields struct {
+	Name         string `json:"name,omitempty"`
+	CreatedAt    string `json:"created_at,omitempty"`
+	IsActive     bool   `json:"is_active,omitempty"`
+	Source       string `json:"source,omitempty"`
+	User         int    `json:"user,omitempty"`
+	ClipGeometry string `json:"clip_geometry,omitempty"`
+	Notes        string `json:"notes,omitempty"`
+}
+
+type AOI struct {
+	Fields Fields `json:"fields,omitempty"`
+	Model  string `json:"model,omitempty"`
+	Pk     int    `json:"pk,omitempty"`
+}
+
+type AOIItem struct {
+	ExportSet          []Export            `json:"export_set,omitempty"`
+	RasterCollects     []RasterCollect     `json:"raster_collects,omitempty"`
+	PointcloudCollects []PointcloudCollect `json:"pointcloud_collects,omitempty"`
+	AOIs               []AOI               `json:"aoi,omitempty"`
+}
+
+type AOIResponse map[string]AOIItem
+
+func (s *AOIService) List(geom string) (*AOIResponse, *Response, error) {
+	url := "api/v1/aoi/?source=toasted_filament"
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
-	aoiList := new(AOIList)
+	aoiList := new(AOIResponse)
 	resp, err := s.client.Do(req, aoiList)
-	return aoiList.AOIs, resp, err
+	return aoiList, resp, err
 }
 
-func (s *AOIService) ListByPk(pk int) ([]Export, *Response, error) {
-	url := fmt.Sprintf("api/v0/aoi/%v/", pk)
+func (s *AOIService) ListByPk(pk int) (*AOIItem, *Response, error) {
+	url := fmt.Sprintf("api/v1/aoi/%v/?source=toasted_filament", pk)
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
-	aoiDetail := new(AOIDetail)
+	aoiDetail := new(AOIItem)
 	resp, err := s.client.Do(req, aoiDetail)
-	return aoiDetail.ExportSet, resp, err
+	return aoiDetail, resp, err
 }

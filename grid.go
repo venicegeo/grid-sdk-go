@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	defaultBaseURL = "https://rsgis.erdc.dren.mil/te_ba/"
+	defaultBaseURL = "https://gridte.rsgis.erdc.dren.mil/te_ba/"
 )
 
 // A Client manages communication with the GRiD API.
@@ -29,8 +29,6 @@ type Client struct {
 	// Services used for talking to different parts of the GRiD API.
 	AOI    *AOIService
 	Export *ExportService
-	// File     *FileService
-	// Download *DownloadService
 }
 
 // NewClient returns a new GRiD API client.  If a nil httpClient is
@@ -50,8 +48,6 @@ func NewClient(httpClient *http.Client) *Client {
 	c := &Client{client: httpClient, transport: tr, BaseURL: baseURL}
 	c.AOI = &AOIService{client: c}
 	c.Export = &ExportService{client: c}
-	// c.File = &FileService{client: c}
-	// c.Download = &DownloadService{client: c}
 	return c
 }
 
@@ -82,10 +78,6 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 		return nil, err
 	}
 
-	// req.Header.Add("Accept", mediaTypeV3)
-	// if c.UserAgent != "" {
-	// 	req.Header.Add("User-Agent", c.UserAgent)
-	// }
 	return req, nil
 }
 
@@ -103,8 +95,6 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	defer resp.Body.Close()
 
 	response := newResponse(resp)
-
-	// c.Rate = response.Rate
 
 	err = CheckResponse(resp)
 	if err != nil {
@@ -150,8 +140,6 @@ type Response struct {
 // newResponse creates a new Response for the provided http.Response.
 func newResponse(r *http.Response) *Response {
 	response := &Response{Response: r}
-	// response.populatePageValues()
-	// response.populateRate()
 	return response
 }
 
@@ -211,7 +199,6 @@ type Error struct {
 type BasicAuthTransport struct {
 	Username string // GitHub username
 	Password string // GitHub password
-	// OTP      string // one-time password for users with two-factor auth enabled
 
 	// Transport is the underlying HTTP transport to use when making requests.
 	// It will default to http.DefaultTransport if nil.
@@ -220,11 +207,7 @@ type BasicAuthTransport struct {
 
 // RoundTrip implements the RoundTripper interface.
 func (t *BasicAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	// req = cloneRequest(req) // per RoundTrip contract
 	req.SetBasicAuth(t.Username, t.Password)
-	// if t.OTP != "" {
-	// req.Header.Add(headerOTP, t.OTP)
-	// }
 	return t.transport().RoundTrip(req)
 }
 

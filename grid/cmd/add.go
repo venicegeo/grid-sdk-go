@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package cmd
 
 import (
@@ -24,19 +25,17 @@ var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add an AOI",
 	Long:  "",
-	Run:   RunAdd,
-}
+	Run: func(cmd *cobra.Command, args []string) {
+		geom := "POLYGON((30 10,40 40,20 40,10 20,30 10))"
+		//geom := args[0]
+		tp := GetTransport()
 
-func RunAdd(cmd *cobra.Command, args []string) {
-	geom := "POLYGON((30 10,40 40,20 40,10 20,30 10))"
-	//geom := args[0]
-	tp := GetTransport()
-
-	// github client configured to use test server
-	client := grid.NewClient(tp.Client())
-	a, _, err := client.AOI.Add("foo", geom, true)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	fmt.Println(a.Success)
+		// github client configured to use test server
+		client := grid.NewClient(tp.Client())
+		a, _, err := client.AOI.Add("foo", geom, true)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		fmt.Println(a.Success)
+	},
 }

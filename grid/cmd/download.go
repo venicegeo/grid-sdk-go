@@ -11,10 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package cmd
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 	"github.com/venicegeo/grid-sdk-go"
@@ -24,22 +25,17 @@ var pullCmd = &cobra.Command{
 	Use:   "pull",
 	Short: "Download File",
 	Long:  "",
-	Run:   DownloadFile,
+	Run: func(cmd *cobra.Command, args []string) {
+		tp := GetTransport()
+		client := grid.NewClient(tp.Client())
+
+		_, err := client.Export.DownloadByPk(pk)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+	},
 }
 
 func init() {
 	pullCmd.Flags().IntVarP(&pk, "pk", "", 0, "Primary key")
-}
-
-// DownloadFile downloads a file by pk.
-func DownloadFile(cmd *cobra.Command, args []string) {
-	tp := GetTransport()
-
-	// github client configured to use test server
-	client := grid.NewClient(tp.Client())
-	resp, err := client.Export.DownloadByPk(pk)
-	fmt.Println(resp)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
 }

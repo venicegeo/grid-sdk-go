@@ -87,7 +87,7 @@ func getExports(pk int) interface{} {
 	tp := GetTransport()
 	client := grid.NewClient(tp.Client())
 
-	a, _, err := client.AOI.ListByPk(pk)
+	a, _, err := client.AOI.Get(pk)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

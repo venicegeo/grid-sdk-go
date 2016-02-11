@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package grid
 
 import (
@@ -28,6 +29,10 @@ type AOIService struct {
 	client *Client
 }
 
+// Export represents the export object that is returned as part of an AOIItem.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#export-object
 type Export struct {
 	Status    string `json:"status,omitempty"`
 	Name      string `json:"name,omitempty"`
@@ -38,34 +43,51 @@ type Export struct {
 	StartedAt string `json:"started_at,omitempty"`
 }
 
+// RasterCollect represents the raster collect object that is returned as part
+// of an AOIItem.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#collect-object
 type RasterCollect struct {
 	Datatype string `json:"datatype,omitempty"`
 	Pk       int    `json:"pk,omitempty"`
 	Name     string `json:"name,omitempty"`
 }
 
+// PointcloudCollect represents the pointcloud collect object that is returned
+// as part of an AOIItem.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#collect-object
 type PointcloudCollect struct {
 	Datatype string `json:"datatype,omitempty"`
 	Pk       int    `json:"pk,omitempty"`
 	Name     string `json:"name,omitempty"`
 }
 
-type Fields struct {
-	Name         string `json:"name,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
-	IsActive     bool   `json:"is_active,omitempty"`
-	Source       string `json:"source,omitempty"`
-	User         int    `json:"user,omitempty"`
-	ClipGeometry string `json:"clip_geometry,omitempty"`
-	Notes        string `json:"notes,omitempty"`
-}
-
+// AOI represents the AOI object that is returned by the AOI detail endpoint.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#aoi-object2
 type AOI struct {
-	Fields Fields `json:"fields,omitempty"`
-	Model  string `json:"model,omitempty"`
-	Pk     int    `json:"pk,omitempty"`
+	// Fields Fields `json:"fields,omitempty"`
+	Fields struct {
+		Name         string `json:"name,omitempty"`
+		CreatedAt    string `json:"created_at,omitempty"`
+		IsActive     bool   `json:"is_active,omitempty"`
+		Source       string `json:"source,omitempty"`
+		User         int    `json:"user,omitempty"`
+		ClipGeometry string `json:"clip_geometry,omitempty"`
+		Notes        string `json:"notes,omitempty"`
+	} `json:"fields,omitempty"`
+	Model string `json:"model,omitempty"`
+	Pk    int    `json:"pk,omitempty"`
 }
 
+// AOIItem represents the AOI object that is returned by the AOI list endpoint.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#aoi-detail-object
 type AOIItem struct {
 	ExportSet          []Export            `json:"export_set,omitempty"`
 	RasterCollects     []RasterCollect     `json:"raster_collects,omitempty"`
@@ -73,13 +95,26 @@ type AOIItem struct {
 	AOIs               []AOI               `json:"aoi,omitempty"`
 }
 
+// AOIResponse represents the collection of AOIItems returned by the AOI list
+// endpoint.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#aoi-object
 type AOIResponse map[string]AOIItem
 
+// AddAOIResponse represents the response returned by the AOI add endpoint.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#aoi-detail-object
 type AddAOIResponse struct {
 	Item    AOIItem
 	Success bool `json:"success,omitempty"`
 }
 
+// List retrieves all AOIs intersecting the optional geometry.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#get-a-users-aoi-list
 func (s *AOIService) List(geom string) (*AOIResponse, *Response, error) {
 	url := "api/v1/aoi/?source=toasted_filament"
 
@@ -90,7 +125,12 @@ func (s *AOIService) List(geom string) (*AOIResponse, *Response, error) {
 	return aoiList, resp, err
 }
 
-func (s *AOIService) ListByPk(pk int) (*AOIItem, *Response, error) {
+// Get returns AOI details for the AOI specified by the user-provided primary
+// key.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#get-aoi-details
+func (s *AOIService) Get(pk int) (*AOIItem, *Response, error) {
 	url := fmt.Sprintf("api/v1/aoi/%v/?source=toasted_filament", pk)
 
 	req, err := s.client.NewRequest("GET", url, nil)
@@ -100,6 +140,10 @@ func (s *AOIService) ListByPk(pk int) (*AOIItem, *Response, error) {
 	return aoiDetail, resp, err
 }
 
+// Add uploads the given geometry to create a new AOI.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#add-aoi
 func (s *AOIService) Add(name, geom string, subscribe bool) (*AddAOIResponse, *Response, error) {
 	v := url.Values{}
 	v.Set("geom", geom)

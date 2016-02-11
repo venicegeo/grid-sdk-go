@@ -1,6 +1,9 @@
 package grid
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 // AOIService handles communication with the AOI related
 // methods of the GRiD API.
@@ -59,6 +62,11 @@ type AOIItem struct {
 
 type AOIResponse map[string]AOIItem
 
+type AddAOIResponse struct {
+	Item    AOIItem
+	Success bool `json:"success,omitempty"`
+}
+
 func (s *AOIService) List(geom string) (*AOIResponse, *Response, error) {
 	url := "api/v1/aoi/?source=toasted_filament"
 
@@ -77,4 +85,21 @@ func (s *AOIService) ListByPk(pk int) (*AOIItem, *Response, error) {
 	aoiDetail := new(AOIItem)
 	resp, err := s.client.Do(req, aoiDetail)
 	return aoiDetail, resp, err
+}
+
+func (s *AOIService) Add(name, geom string, subscribe bool) (*AddAOIResponse, *Response, error) {
+	v := url.Values{}
+	v.Set("geom", geom)
+	v.Add("name", name)
+	v.Add("source", "toasted_filament")
+	if subscribe {
+		v.Add("subscribe", "True")
+	}
+	vals := v.Encode()
+	qurl := fmt.Sprintf("api/v1/aoi/add/?%v", vals)
+
+	req, err := s.client.NewRequest("GET", qurl, nil)
+	addAOIResponse := new(AddAOIResponse)
+	resp, err := s.client.Do(req, addAOIResponse)
+	return addAOIResponse, resp, err
 }

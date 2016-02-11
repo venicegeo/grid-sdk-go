@@ -64,7 +64,7 @@ func getExportFiles(pk int) interface{} {
 
 	// github client configured to use test server
 	client := grid.NewClient(tp.Client())
-	a, _, err := client.Export.ListByPk(pk)
+	a, _, err := client.Export.Get(pk)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -97,7 +97,7 @@ func printExport(a *grid.AOIItem) {
 	}
 }
 
-func printExportFile(a *grid.ExportResponse) {
+func printExportFile(a *grid.ExportDetail) {
 	if len(a.ExportFiles) > 0 {
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 8, 3, '\t', 0)
@@ -136,7 +136,7 @@ func RunLs(cmd *cobra.Command, args []string) {
 		switch u := v.(type) {
 		case *grid.AOIItem:
 			printExport(u)
-		case *grid.ExportResponse:
+		case *grid.ExportDetail:
 			printExportFile(u)
 		case *grid.AOIResponse:
 			printAOI(u)

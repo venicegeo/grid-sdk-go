@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package grid
 
 import (
@@ -27,13 +28,22 @@ type ExportService struct {
 	client *Client
 }
 
+// ExportFile represents the export file object that is returned by the export
+// endpoint.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#exportfiles-object
 type ExportFile struct {
 	URL  string `json:"url,omitempty"`
 	Pk   int    `json:"pk,omitempty"`
 	Name string `json:"name,omitempty"`
 }
 
-type TDA struct {
+// TDASet represents the TDA set object that is returned by the export endpoint.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#tda-set-object
+type TDASet struct {
 	Status    string `json:"status,omitempty"`
 	TDAType   string `json:"tda_type,omitempty"`
 	Name      string `json:"name,omitempty"`
@@ -43,21 +53,32 @@ type TDA struct {
 	Notes     string `json:"notes,omitempty"`
 }
 
-type ExportResponse struct {
+// ExportDetail represents the export detail object that is returned by the
+// export endpoint.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#export-detail-object
+type ExportDetail struct {
 	ExportFiles []ExportFile `json:"exportfiles,omitempty"`
-	TDASet      []TDA        `json:"tda_set,omitempty"`
+	TDASets     []TDASet     `json:"tda_set,omitempty"`
 }
 
-func (s *ExportService) ListByPk(pk int) (*ExportResponse, *Response, error) {
+// Get returns export details for the export specified by the user-provided
+// primary key.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#get-export-details
+func (s *ExportService) Get(pk int) (*ExportDetail, *Response, error) {
 	url := fmt.Sprintf("api/v1/export/%v/?source=toasted_filament", pk)
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
-	exportDetail := new(ExportResponse)
+	exportDetail := new(ExportDetail)
 	resp, err := s.client.Do(req, exportDetail)
 	return exportDetail, resp, err
 }
 
+// DownloadByPk downloads the file specified by the user-provided primary key.
 func (s *ExportService) DownloadByPk(pk int) (*Response, error) {
 	url := fmt.Sprintf("export/download/file/%v/", pk)
 

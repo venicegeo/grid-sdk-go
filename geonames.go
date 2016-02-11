@@ -29,7 +29,8 @@ type GeonamesService struct {
 	client *Client
 }
 
-// Geoname represents the suggested name for the given geometry.
+// Geoname represents the geoname object that is returned by the geoname
+// endpoint.
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#geoname-object

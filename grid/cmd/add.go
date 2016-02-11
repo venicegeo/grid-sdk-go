@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 	"github.com/venicegeo/grid-sdk-go"
@@ -26,16 +27,27 @@ var addCmd = &cobra.Command{
 	Short: "Add an AOI",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		geom := "POLYGON((30 10,40 40,20 40,10 20,30 10))"
-		//geom := args[0]
-		tp := GetTransport()
-
-		// github client configured to use test server
-		client := grid.NewClient(tp.Client())
-		a, _, err := client.AOI.Add("foo", geom, true)
-		if err != nil {
-			fmt.Println(err.Error())
+		if len(args) == 0 {
+			fmt.Println("Please provide a WKT geometry")
+			cmd.Usage()
+			return
 		}
-		fmt.Println(a.Success)
+
+		tp := GetTransport()
+		client := grid.NewClient(tp.Client())
+		key := GetKey()
+
+		for _, geom := range args {
+			a, _, err := client.Geonames.Lookup(geom, key)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(a.Name)
+			b, _, err := client.AOI.Add(a.Name, geom, key, true)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("%+v\n", *b)
+		}
 	},
 }

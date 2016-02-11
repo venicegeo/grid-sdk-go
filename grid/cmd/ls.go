@@ -75,7 +75,7 @@ func getAOIs() interface{} {
 	tp := GetTransport()
 	client := grid.NewClient(tp.Client())
 
-	a, _, err := client.AOI.List("")
+	a, _, err := client.AOI.List("", GetKey())
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -87,7 +87,7 @@ func getExports(pk int) interface{} {
 	tp := GetTransport()
 	client := grid.NewClient(tp.Client())
 
-	a, _, err := client.AOI.Get(pk)
+	a, _, err := client.AOI.Get(pk, GetKey())
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -99,7 +99,7 @@ func getExportFiles(pk int) interface{} {
 	tp := GetTransport()
 	client := grid.NewClient(tp.Client())
 
-	a, _, err := client.Export.Get(pk)
+	a, _, err := client.Export.Get(pk, GetKey())
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -120,6 +120,7 @@ func printAOI(a *grid.AOIResponse) {
 }
 
 func printExport(a *grid.AOIItem) {
+	fmt.Println(a.AOIs[0].Fields.ClipGeometry)
 	if len(a.ExportSet) > 0 {
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 8, 3, '\t', 0)

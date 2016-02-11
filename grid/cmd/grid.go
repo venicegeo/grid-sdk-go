@@ -18,7 +18,9 @@ import (
 	"bufio"
 	"crypto/tls"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -95,15 +97,42 @@ func getAuth() string {
 		path = os.Getenv("HOME")
 	}
 	path = path + string(filepath.Separator) + ".grid"
-	fileandpath := path + string(filepath.Separator) + "credentials"
+	fileandpath := path + string(filepath.Separator) + "config.json"
+	file, err := os.Open(fileandpath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var config Config
+	b, err := ioutil.ReadAll(file)
+	json.Unmarshal(b, &config)
+	return config.Auth
+}
+
+// GetKey extracts the user's API key from the config.json.
+func GetKey() string {
+	var path string
+	if runtime.GOOS == "windows" {
+		path = os.Getenv("HOMEPATH")
+	} else {
+		path = os.Getenv("HOME")
+	}
+	path = path + string(filepath.Separator) + ".grid"
+	fileandpath := path + string(filepath.Separator) + "config.json"
 	file, err := os.Open(fileandpath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	reader := bufio.NewReader(file)
-	line, err := reader.ReadString('\n')
-	return line
+	var config Config
+	b, err := ioutil.ReadAll(file)
+	json.Unmarshal(b, &config)
+	return config.Key
+}
+
+// Config represents the config JSON structure.
+type Config struct {
+	Auth string `json:"auth"`
+	Key  string `json:"key"`
 }
 
 func GetTransport() grid.BasicAuthTransport {

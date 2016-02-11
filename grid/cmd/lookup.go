@@ -35,9 +35,10 @@ var lookupCmd = &cobra.Command{
 
 		tp := GetTransport()
 		client := grid.NewClient(tp.Client())
+		key := GetKey()
 
 		for _, geom := range args {
-			a, _, err := client.Geonames.Lookup(geom)
+			a, _, err := client.Geonames.Lookup(geom, key)
 			if err != nil {
 				log.Fatal(err)
 			}

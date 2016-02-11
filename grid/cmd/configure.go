@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"encoding/base64"
-	"fmt"
+	"encoding/json"
 	"log"
 	"os"
 	"path/filepath"
@@ -44,12 +44,13 @@ var configureCmd = &cobra.Command{
 		// if err != nil {
 		// log.Fatal(err)
 		// }
-		fileandpath := path + string(filepath.Separator) + "credentials"
+		fileandpath := path + string(filepath.Separator) + "config.json"
 		file, err := os.Create(fileandpath)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer file.Close()
-		fmt.Fprintln(file, str)
+		config := Config{Auth: str, Key: "toasted_filament"}
+		json.NewEncoder(file).Encode(config)
 	},
 }

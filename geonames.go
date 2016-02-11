@@ -11,29 +11,42 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package grid
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 )
 
-// AOIService handles communication with the AOI related
-// methods of the GRiD API.
+// GeonamesService handles communication with the Geoname related methods of the
+// GRiD API.
 //
 // GRiD API docs:
-// https://github.com/CRREL/GRiD-API/blob/v0.0/composed_api.rst#get-a-users-aoi-list
-// https://github.com/CRREL/GRiD-API/blob/v0.0/composed_api.rst#get-aoi-details
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#lookup-geoname
 type GeonamesService struct {
 	client *Client
 }
 
-type GeonamesResponse struct {
-	Name             string `json:"name,omitempty"`
-	ProvidedGeometry string `json:"provided_geometry,omitempty"`
+// Geoname represents the suggested name for the given geometry.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#geoname-object
+type Geoname struct {
+	Name     string `json:"name,omitempty"`
+	Geometry string `json:"provided_geometry,omitempty"`
 }
 
-func (s *GeonamesService) Lookup(geom string) (*GeonamesResponse, *Response, error) {
+// Lookup the suggested name for the given geometry.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#lookup-geoname
+func (s *GeonamesService) Lookup(geom string) (*Geoname, *Response, error) {
+	if geom == "" {
+		return nil, nil, errors.New("Please provide a WKT geometry string")
+	}
+
 	v := url.Values{}
 	v.Set("geom", geom)
 	v.Add("source", "toasted_filament")
@@ -42,7 +55,7 @@ func (s *GeonamesService) Lookup(geom string) (*GeonamesResponse, *Response, err
 
 	req, err := s.client.NewRequest("GET", qurl, nil)
 
-	geonamesResponse := new(GeonamesResponse)
-	resp, err := s.client.Do(req, geonamesResponse)
-	return geonamesResponse, resp, err
+	name := new(Geoname)
+	resp, err := s.client.Do(req, name)
+	return name, resp, err
 }

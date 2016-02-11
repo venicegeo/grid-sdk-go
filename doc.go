@@ -12,36 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+/*
+Package grid provides a client for using the GRiD API.
 
-import (
-	"fmt"
-	"log"
-
-	"github.com/spf13/cobra"
-	"github.com/venicegeo/grid-sdk-go"
-)
-
-var lookupCmd = &cobra.Command{
-	Use:   "lookup <WKT geometry>...",
-	Short: "Get suggested AOI name",
-	Long:  "",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			fmt.Println("Please provide a WKT geometry")
-			cmd.Usage()
-			return
-		}
-
-		tp := GetTransport()
-		client := grid.NewClient(tp.Client())
-
-		for _, geom := range args {
-			a, _, err := client.Geonames.Lookup(geom)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println(a.Name)
-		}
-	},
-}
+Portions of the grid package borrow heavily from https://github.com/google/go-github, a Go library for accessing the GitHub API, which is released under a BSD-style license (https://github.com/google/go-github/blob/master/LICENSE).
+*/
+package grid

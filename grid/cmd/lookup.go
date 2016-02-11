@@ -23,7 +23,7 @@ import (
 )
 
 var lookupCmd = &cobra.Command{
-	Use:   "lookup <WKT geometry>...",
+	Use:   "lookup [WKT geometry]...",
 	Short: "Get suggested AOI name",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {

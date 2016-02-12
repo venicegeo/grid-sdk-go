@@ -106,10 +106,7 @@ type AOIResponse map[string]AOIItem
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#aoi-detail-object
-type AddAOIResponse struct {
-	Item    AOIItem
-	Success bool `json:"success,omitempty"`
-}
+type AddAOIResponse map[string]interface{}
 
 // List retrieves all AOIs intersecting the optional geometry.
 //

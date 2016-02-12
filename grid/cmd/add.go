@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -42,12 +43,31 @@ var addCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println(a.Name)
 			b, _, err := client.AOI.Add(a.Name, geom, key, true)
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Printf("%+v\n", *b)
+			success := (*b)["success"].(bool)
+			if success {
+				delete((*b), "success")
+
+				d, err := json.Marshal(b)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				c := new(grid.AOIResponse)
+				err = json.Unmarshal(d, &c)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				for _, v := range *c {
+					for _, v := range v.AOIs {
+						fmt.Printf("Successfully created AOI \"%v\" with primary key \"%v\" at %v\n", v.Fields.Name, v.Pk, v.Fields.CreatedAt)
+					}
+				}
+			}
 		}
 	},
 }

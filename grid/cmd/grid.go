@@ -38,11 +38,9 @@ import (
 // GridCmd is Grid's root command. Every other command attached to GridCmd is a
 // child command to it.
 var GridCmd = &cobra.Command{
-	Use:   "grid",
-	Short: "grid short",
-	Long: `grid is the main command.
-
-grid provide CLI access to GRiD.`,
+	Use: "grid",
+	Long: `
+grid is a command-line interface to the GRiD database.`,
 }
 
 var pk int

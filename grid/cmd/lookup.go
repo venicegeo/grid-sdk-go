@@ -25,7 +25,9 @@ import (
 var lookupCmd = &cobra.Command{
 	Use:   "lookup [WKT geometry]...",
 	Short: "Get suggested AOI name",
-	Long:  "",
+	Long: `
+Lookup is used to retrieve a suggested AOI name from GRiD's Geonames endpoint
+for each of the provided WKT geometries.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			fmt.Println("Please provide a WKT geometry")
@@ -33,11 +35,13 @@ var lookupCmd = &cobra.Command{
 			return
 		}
 
+		// setup the GRiD client
 		tp := GetTransport()
 		client := grid.NewClient(tp.Client())
 		key := GetKey()
 
 		for _, geom := range args {
+			// get and print the suggested name for the current geometry
 			a, _, err := client.Geonames.Lookup(geom, key)
 			if err != nil {
 				log.Fatal(err)

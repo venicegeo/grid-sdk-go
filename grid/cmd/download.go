@@ -24,11 +24,14 @@ import (
 var pullCmd = &cobra.Command{
 	Use:   "pull",
 	Short: "Download File",
-	Long:  "",
+	Long: `
+Download the file(s) specified by the given primary key(s).`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// setup the GRiD client
 		tp := GetTransport()
 		client := grid.NewClient(tp.Client())
 
+		// TODO(chambbj): allow for multiple pks/downloads
 		_, err := client.Export.DownloadByPk(pk)
 		if err != nil {
 			log.Fatal(err.Error())
@@ -36,6 +39,7 @@ var pullCmd = &cobra.Command{
 	},
 }
 
+// TODO(chambbj): pass pk(s) as argument(s), as with the other commands
 func init() {
 	pullCmd.Flags().IntVarP(&pk, "pk", "", 0, "Primary key")
 }

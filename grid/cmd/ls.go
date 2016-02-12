@@ -28,7 +28,11 @@ import (
 var lsCmd = &cobra.Command{
 	Use:   "ls [pk...]",
 	Short: "List AOI/Export/File details",
-	Long:  "",
+	Long: `
+List AOI, export, or file details for the provided primary keys.
+
+With no keys specified, the command returns a listing of all of the user's
+AOIs.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// If there is no primary key provided, we just return a root level listing.
 		if len(args) == 0 {
@@ -36,10 +40,9 @@ var lsCmd = &cobra.Command{
 			printAOI(result.(*grid.AOIResponse))
 		}
 
-		var results []interface{}
-
 		// If the user has provided one or more arguments, assume they are primary
 		// keys and concurrently query the AOI and export API endpoints for details.
+		var results []interface{}
 		for _, arg := range args {
 			pk, err := strconv.Atoi(arg)
 			if err != nil {
@@ -72,9 +75,11 @@ var lsCmd = &cobra.Command{
 }
 
 func getAOIs() interface{} {
+	// setup the GRiD client
 	tp := GetTransport()
 	client := grid.NewClient(tp.Client())
 
+	// get the full list of AOIs
 	a, _, err := client.AOI.List("", GetKey())
 	if err != nil {
 		log.Fatal(err.Error())
@@ -84,9 +89,11 @@ func getAOIs() interface{} {
 }
 
 func getExports(pk int) interface{} {
+	// setup the GRiD client
 	tp := GetTransport()
 	client := grid.NewClient(tp.Client())
 
+	// get information on the AOI specified by the given primary key
 	a, _, err := client.AOI.Get(pk, GetKey())
 	if err != nil {
 		log.Fatal(err.Error())
@@ -96,9 +103,11 @@ func getExports(pk int) interface{} {
 }
 
 func getExportFiles(pk int) interface{} {
+	// setup the GRiD client
 	tp := GetTransport()
 	client := grid.NewClient(tp.Client())
 
+	// get information on the export specified by the given primary key
 	a, _, err := client.Export.Get(pk, GetKey())
 	if err != nil {
 		log.Fatal(err.Error())

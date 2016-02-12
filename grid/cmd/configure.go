@@ -28,11 +28,18 @@ import (
 var configureCmd = &cobra.Command{
 	Use:   "configure",
 	Short: "Configure the CLI",
-	Long:  "",
+	Long: `
+Configure the GRiD CLI with the user's GRiD credentials.
+
+This function will prompt the user for their GRiD username and password, which
+is encoded in the user's config.json file`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// prompt user for username and password and base64 encode it
 		un, pw := logon()
 		data := []byte(un + ":" + pw)
 		str := base64.StdEncoding.EncodeToString(data)
+
+		// get the appropriate path for the config.json, depends on platform
 		var path string
 		if runtime.GOOS == "windows" {
 			path = os.Getenv("HOMEPATH")
@@ -40,16 +47,23 @@ var configureCmd = &cobra.Command{
 			path = os.Getenv("HOME")
 		}
 		path = path + string(filepath.Separator) + ".grid"
+
+		// TODO(chambbj): I think this does throw an error on Windows. Need to
+		// better understand platform-specific behavior.
 		err := os.Mkdir(path, 0777)
 		// if err != nil {
 		// log.Fatal(err)
 		// }
+
 		fileandpath := path + string(filepath.Separator) + "config.json"
 		file, err := os.Create(fileandpath)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer file.Close()
+
+		// encode the configuration details as JSON
+		// TODO(chambbj): prompt user to enter key as part of configure.
 		config := Config{Auth: str, Key: "toasted_filament"}
 		json.NewEncoder(file).Encode(config)
 	},

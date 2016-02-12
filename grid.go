@@ -29,6 +29,10 @@ const (
 	defaultBaseURL = "https://gridte.rsgis.erdc.dren.mil/te_ba/"
 )
 
+// TODO(chambbj): We can probably simplify code by handling the API key at this
+// level (e.g., embedding as part of NewRequest, or adding an addOptions
+// method), rather than passing it as a parameter in each function call.
+
 // A Client manages communication with the GRiD API.
 type Client struct {
 	// HTTP client used to communicate with the API.

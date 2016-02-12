@@ -24,9 +24,14 @@ import (
 )
 
 var addCmd = &cobra.Command{
-	Use:   "add",
+	Use:   "add [WKT geometry]...",
 	Short: "Add an AOI",
-	Long:  "",
+	Long: `
+Attempt to create new Areas of Interest (AOIs) within GRiD by passing one or
+more WKT geometries.
+
+This function queries GRiD's Geonames endpoint with the provided geometries and
+automatically uses the returned values as the AOI names.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			fmt.Println("Please provide a WKT geometry")
@@ -34,19 +39,25 @@ var addCmd = &cobra.Command{
 			return
 		}
 
+		// setup the GRiD client
 		tp := GetTransport()
 		client := grid.NewClient(tp.Client())
 		key := GetKey()
 
 		for _, geom := range args {
+			// get suggested name for the current geometry
 			a, _, err := client.Geonames.Lookup(geom, key)
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			// create a new AOI for the current geometry with suggested name
 			b, _, err := client.AOI.Add(a.Name, geom, key, true)
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			// all this to simply parse the result and print the pk of the new AOI
 			success := (*b)["success"].(bool)
 			if success {
 				delete((*b), "success")

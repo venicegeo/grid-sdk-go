@@ -13,4 +13,4 @@ deploy:
     - grid_windows_x86_64
   skip_cleanup: true
   on:
-    repo: venicegeo/grid-sdk-go
+    tags: true

@@ -14,6 +14,15 @@ Use `go get` to install the latest version of both the CLI and the library.
 
     $ go get -v github.com/venicegeo/grid-sdk-go
 
+There are also some dependencies.
+
+    $ go get -v github.com/spf13/cobra
+    $ go get -v golang.org/x/crypto/ssh/terminal
+
+To install.
+
+    $ go install github.com/venicegeo/grid-sdk-go/...
+
 To include it in your application.
 
     import "github.com/venicegeo/grid-sdk-go"

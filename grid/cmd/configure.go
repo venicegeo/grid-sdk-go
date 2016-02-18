@@ -35,9 +35,8 @@ This function will prompt the user for their GRiD username and password, which
 is encoded in the user's config.json file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// prompt user for username and password and base64 encode it
-		un, pw := logon()
-		data := []byte(un + ":" + pw)
-		str := base64.StdEncoding.EncodeToString(data)
+		un, pw, key := logon()
+		str := base64.StdEncoding.EncodeToString([]byte(pw))
 
 		// get the appropriate path for the config.json, depends on platform
 		var path string
@@ -63,8 +62,7 @@ is encoded in the user's config.json file`,
 		defer file.Close()
 
 		// encode the configuration details as JSON
-		// TODO(chambbj): prompt user to enter key as part of configure.
-		config := Config{Auth: str, Key: "toasted_filament"}
+		config := Config{UN: un, PW: str, Key: key}
 		json.NewEncoder(file).Encode(config)
 	},
 }

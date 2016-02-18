@@ -76,18 +76,23 @@ func init() {
 	gridCmdV = GridCmd
 }
 
-func logon() (username, password string) {
+func logon() (username, password, key string) {
 	r := bufio.NewReader(os.Stdin)
 	fmt.Print("GRiD Username: ")
 	username, _ = r.ReadString('\n')
+  username = strings.TrimSpace(username)
 
 	fmt.Print("GRiD Password: ")
 	bytePassword, _ := terminal.ReadPassword(int(syscall.Stdin))
 	password = string(bytePassword)
+
+  fmt.Print("\nGRiD API Key: ")
+	key, _ = r.ReadString('\n')
+  key = strings.TrimSpace(key)
 	return
 }
 
-func getAuth() string {
+func GetConfig() Config {
 	var path string
 	if runtime.GOOS == "windows" {
 		path = os.Getenv("HOMEPATH")
@@ -98,60 +103,33 @@ func getAuth() string {
 	fileandpath := path + string(filepath.Separator) + "config.json"
 	file, err := os.Open(fileandpath)
 	if err != nil {
-		log.Fatal(err)
+    log.Fatal("No authentication. Please run 'grid configure' first.")    
 	}
 	var config Config
 	b, err := ioutil.ReadAll(file)
 	json.Unmarshal(b, &config)
-	return config.Auth
-}
-
-// GetKey extracts the user's API key from the config.json.
-func GetKey() string {
-	var path string
-	if runtime.GOOS == "windows" {
-		path = os.Getenv("HOMEPATH")
-	} else {
-		path = os.Getenv("HOME")
-	}
-	path = path + string(filepath.Separator) + ".grid"
-	fileandpath := path + string(filepath.Separator) + "config.json"
-	file, err := os.Open(fileandpath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	var config Config
-	b, err := ioutil.ReadAll(file)
-	json.Unmarshal(b, &config)
-	return config.Key
+	return config
 }
 
 // Config represents the config JSON structure.
 type Config struct {
-	Auth string `json:"auth"`
+	UN string `json:"username"`
+  PW string `json:"password"`
 	Key  string `json:"key"`
 }
 
 func GetTransport() grid.BasicAuthTransport {
-	authstr := getAuth()
-	var username, password string
-	if authstr == "" {
-		username, password = logon()
-	} else {
-		data, _ := base64.StdEncoding.DecodeString(authstr)
-		up := strings.Split(string(data), ":")
-		username = up[0]
-		password = up[1]
-	}
+	config := GetConfig()
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
+  password, _ := base64.StdEncoding.DecodeString(string (config.PW))
+
 	tp := grid.BasicAuthTransport{
-		Username:  strings.TrimSpace(username),
-		Password:  strings.TrimSpace(password),
+		Username:  config.UN,
+		Password:  string (password),
 		Transport: tr,
 	}
 

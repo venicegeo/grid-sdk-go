@@ -38,7 +38,7 @@ for each of the provided WKT geometries.`,
 		// setup the GRiD client
 		tp := GetTransport()
 		client := grid.NewClient(tp.Client())
-		key := GetKey()
+		key := GetConfig().Key
 
 		for _, geom := range args {
 			// get and print the suggested name for the current geometry

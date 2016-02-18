@@ -42,7 +42,7 @@ automatically uses the returned values as the AOI names.`,
 		// setup the GRiD client
 		tp := GetTransport()
 		client := grid.NewClient(tp.Client())
-		key := GetKey()
+		key := GetConfig().Key
 
 		for _, geom := range args {
 			// get suggested name for the current geometry

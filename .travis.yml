@@ -7,10 +7,7 @@ deploy:
   provider: releases
   api_key:
     secure: LgmcMR2aArkacf6srfTMsDxm7qjpAA9OVMlRh9DupU0mVmMHA6csXE0uuiUKNZfa9dfr5dc3TFOaYcu5RYOuW0fRgo/CE7dOu1FBvSaz81ZltB8oA1Ak4qXIkivtOdDTg5ii2+uHGTEU0aB/dqGpTB8bRZoxirwdeYqQKjXNmZ/gg1TFn2G78iFAOAZpToqrZr3Ydrws7q7x1kwXvcm1e0yT0Dtsz5zC4BTgtKnh+a5UCXd/cCkXgDuBPVioBA8xvbm6DWWRGZ0DISDjJW7Kq77nNyTdu+HMtE4fc7iWUwfDqiY36KMu0AljBFbVpviaS12PCFPe8StRus2Sgli2alcW7kqgI0c2E1QP/wzYQZPW+oPA6wK9zDLh9pDOMJujueRg0E2nXwKVU24QTyo5g4SxD7IPsYkLKQ6hJMzmuDyIOZqJdpXE3UuK9xwyYHAeAirzLSAVCIHwjLa8sGY0Kpm0EUrR47N+AxWZnBM+YFTbE7QDVrxgoOFZsIIVbT0UD7HqLV4EPSKM456kFsRLp949IBlLHepmYPLKNb0dqocOJAKzG6TF6oyeYffLOPOQ0Enem9brEaiMR83cOGJkCAyoEP/K6HR44lMgL6XexqXyLfRA1yP8he/+EAI5IN2/hfy65jXTuIL7+KteV8jfzsFsWd//P0jouSC9BHoshLo=
-  file:
-    - "grid_darwin_x86_64"
-    - "grid_linux_x86_64"
-    - "grid_windows_x86_64.exe"
+  file: "grid_linux_x86_64"
   skip_cleanup: true
   on:
     tags: true

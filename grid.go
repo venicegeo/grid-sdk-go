@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	defaultBaseURL = "https://gridte.rsgis.erdc.dren.mil/te_ba/"
+	defaultBaseURL = "https://rsgis.erdc.dren.mil/te_ba/"
 )
 
 // TODO(chambbj): We can probably simplify code by handling the API key at this
@@ -179,16 +179,14 @@ func (r *ErrorResponse) Error() string {
 		r.Response.StatusCode, r.Message, r.Errors)
 }
 
-// sanitizeURL redacts the client_id and client_secret tokens from the URL which
-// may be exposed to the user, specifically in the ErrorResponse error message.
+// sanitizeURL was originally used (in the GitHub code) to redact the client_id
+// and client_secret tokens from the URL which may be exposed to the user,
+// specifically in the ErrorResponse error message.
+//
+// We may not need it, but then again, maybe we will have our own sanitization.
 func sanitizeURL(uri *url.URL) *url.URL {
 	if uri == nil {
 		return nil
-	}
-	params := uri.Query()
-	if len(params.Get("client_secret")) > 0 {
-		params.Set("client_secret", "REDACTED")
-		uri.RawQuery = params.Encode()
 	}
 	return uri
 }
@@ -217,8 +215,8 @@ type Error struct {
 // additionally supports users who have two-factor authentication enabled on
 // their GitHub account.
 type BasicAuthTransport struct {
-	Username string // GitHub username
-	Password string // GitHub password
+	Auth string // GRiD Basic Authentication string
+	Key  string // GRiD API key
 
 	// Transport is the underlying HTTP transport to use when making requests.
 	// It will default to http.DefaultTransport if nil.
@@ -227,7 +225,7 @@ type BasicAuthTransport struct {
 
 // RoundTrip implements the RoundTripper interface.
 func (t *BasicAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.SetBasicAuth(t.Username, t.Password)
+	req.Header.Set("Authorization", "Basic "+t.Auth)
 	return t.transport().RoundTrip(req)
 }
 

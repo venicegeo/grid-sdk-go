@@ -36,7 +36,6 @@ is encoded in the user's config.json file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// prompt user for username and password and base64 encode it
 		un, pw, key := logon()
-		str := base64.StdEncoding.EncodeToString([]byte(pw))
 
 		// get the appropriate path for the config.json, depends on platform
 		var path string
@@ -61,8 +60,10 @@ is encoded in the user's config.json file`,
 		}
 		defer file.Close()
 
+		auth := base64.StdEncoding.EncodeToString([]byte(un + ":" + pw))
+
 		// encode the configuration details as JSON
-		config := Config{UN: un, PW: str, Key: key}
+		config := Config{Auth: auth, Key: key}
 		json.NewEncoder(file).Encode(config)
 	},
 }

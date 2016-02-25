@@ -17,7 +17,6 @@ package cmd
 import (
 	"bufio"
 	"crypto/tls"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -80,15 +79,15 @@ func logon() (username, password, key string) {
 	r := bufio.NewReader(os.Stdin)
 	fmt.Print("GRiD Username: ")
 	username, _ = r.ReadString('\n')
-  username = strings.TrimSpace(username)
+	username = strings.TrimSpace(username)
 
 	fmt.Print("GRiD Password: ")
 	bytePassword, _ := terminal.ReadPassword(int(syscall.Stdin))
 	password = string(bytePassword)
 
-  fmt.Print("\nGRiD API Key: ")
+	fmt.Print("\nGRiD API Key: ")
 	key, _ = r.ReadString('\n')
-  key = strings.TrimSpace(key)
+	key = strings.TrimSpace(key)
 	return
 }
 
@@ -103,7 +102,7 @@ func GetConfig() Config {
 	fileandpath := path + string(filepath.Separator) + "config.json"
 	file, err := os.Open(fileandpath)
 	if err != nil {
-    log.Fatal("No authentication. Please run 'grid configure' first.")    
+		log.Fatal("No authentication. Please run 'grid configure' first.")
 	}
 	var config Config
 	b, err := ioutil.ReadAll(file)
@@ -113,8 +112,7 @@ func GetConfig() Config {
 
 // Config represents the config JSON structure.
 type Config struct {
-	UN string `json:"username"`
-  PW string `json:"password"`
+	Auth string `json:"auth"`
 	Key  string `json:"key"`
 }
 
@@ -125,11 +123,9 @@ func GetTransport() grid.BasicAuthTransport {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
-  password, _ := base64.StdEncoding.DecodeString(string (config.PW))
-
 	tp := grid.BasicAuthTransport{
-		Username:  config.UN,
-		Password:  string (password),
+		Auth:      config.Auth,
+		Key:       config.Key,
 		Transport: tr,
 	}
 

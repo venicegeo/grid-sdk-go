@@ -91,7 +91,15 @@ func logon() (username, password, key string) {
 	return
 }
 
-func GetConfig() Config {
+// Config represents the config JSON structure.
+type Config struct {
+	Auth string `json:"auth"`
+	Key  string `json:"key"`
+}
+
+// GetTransport is provided as a convenience to setup the GRiD
+// BasicAuthTransport with Basic Authorization string and API key.
+func GetTransport() grid.BasicAuthTransport {
 	var path string
 	if runtime.GOOS == "windows" {
 		path = os.Getenv("HOMEPATH")
@@ -107,17 +115,6 @@ func GetConfig() Config {
 	var config Config
 	b, err := ioutil.ReadAll(file)
 	json.Unmarshal(b, &config)
-	return config
-}
-
-// Config represents the config JSON structure.
-type Config struct {
-	Auth string `json:"auth"`
-	Key  string `json:"key"`
-}
-
-func GetTransport() grid.BasicAuthTransport {
-	config := GetConfig()
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},

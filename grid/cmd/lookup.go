@@ -38,11 +38,10 @@ for each of the provided WKT geometries.`,
 		// setup the GRiD client
 		tp := GetTransport()
 		client := grid.NewClient(tp.Client())
-		key := GetConfig().Key
 
 		for _, geom := range args {
 			// get and print the suggested name for the current geometry
-			a, _, err := client.Geonames.Lookup(geom, key)
+			a, _, err := client.Geonames.Lookup(geom, tp.Key)
 			if err != nil {
 				log.Fatal(err)
 			}

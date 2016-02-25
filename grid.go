@@ -226,6 +226,11 @@ type BasicAuthTransport struct {
 // RoundTrip implements the RoundTripper interface.
 func (t *BasicAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Set("Authorization", "Basic "+t.Auth)
+
+	a := req.URL.Query()
+	a.Add("source", t.Key)
+	req.URL.RawQuery = a.Encode()
+
 	return t.transport().RoundTrip(req)
 }
 

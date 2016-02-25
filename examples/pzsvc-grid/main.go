@@ -100,7 +100,7 @@ func lookupHandler(writer http.ResponseWriter, request *http.Request) {
 		tp := getTransport()
 		client := grid.NewClient(tp.Client())
 
-		geomObject, resp, err := client.Geonames.Lookup(geom, tp.Key)
+		geomObject, resp, err := client.Geonames.Lookup(geom)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -124,7 +124,7 @@ func getAoiHandler(writer http.ResponseWriter, request *http.Request) {
 		client := grid.NewClient(tp.Client())
 
 		pki, err := strconv.Atoi(pk)
-		aoiObject, resp, err := client.AOI.Get(pki, tp.Key)
+		aoiObject, resp, err := client.AOI.Get(pki)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -153,7 +153,7 @@ func addAoiHandler(writer http.ResponseWriter, request *http.Request) {
 		tp := getTransport()
 		client := grid.NewClient(tp.Client())
 
-		uploadObject, resp, err := client.AOI.Add(name, geom, tp.Key, subscribe)
+		uploadObject, resp, err := client.AOI.Add(name, geom, subscribe)
 		if err != nil {
 			log.Fatal(err.Error())
 		}

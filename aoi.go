@@ -112,8 +112,8 @@ type AddAOIResponse map[string]interface{}
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#get-a-users-aoi-list
-func (s *AOIService) List(geom, key string) (*AOIResponse, *Response, error) {
-	url := fmt.Sprintf("api/v1/aoi/?source=%v", key)
+func (s *AOIService) List(geom string) (*AOIResponse, *Response, error) {
+	url := "api/v1/aoi"
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
@@ -127,8 +127,8 @@ func (s *AOIService) List(geom, key string) (*AOIResponse, *Response, error) {
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#get-aoi-details
-func (s *AOIService) Get(pk int, key string) (*AOIItem, *Response, error) {
-	url := fmt.Sprintf("api/v1/aoi/%v/?source=%v", pk, key)
+func (s *AOIService) Get(pk int) (*AOIItem, *Response, error) {
+	url := fmt.Sprintf("api/v1/aoi/%v", pk)
 
 	req, err := s.client.NewRequest("GET", url, nil)
 
@@ -141,11 +141,10 @@ func (s *AOIService) Get(pk int, key string) (*AOIItem, *Response, error) {
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#add-aoi
-func (s *AOIService) Add(name, geom, key string, subscribe bool) (*AddAOIResponse, *Response, error) {
+func (s *AOIService) Add(name, geom string, subscribe bool) (*AddAOIResponse, *Response, error) {
 	v := url.Values{}
 	v.Set("geom", geom)
 	v.Add("name", name)
-	v.Add("source", key)
 	if subscribe {
 		v.Add("subscribe", "True")
 	}

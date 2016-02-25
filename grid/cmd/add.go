@@ -45,13 +45,13 @@ automatically uses the returned values as the AOI names.`,
 
 		for _, geom := range args {
 			// get suggested name for the current geometry
-			a, _, err := client.Geonames.Lookup(geom, tp.Key)
+			a, _, err := client.Geonames.Lookup(geom)
 			if err != nil {
 				log.Fatal(err)
 			}
 
 			// create a new AOI for the current geometry with suggested name
-			b, _, err := client.AOI.Add(a.Name, geom, tp.Key, true)
+			b, _, err := client.AOI.Add(a.Name, geom, true)
 			if err != nil {
 				log.Fatal(err)
 			}

@@ -68,8 +68,8 @@ type ExportDetail struct {
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#get-export-details
-func (s *ExportService) Get(pk int, key string) (*ExportDetail, *Response, error) {
-	url := fmt.Sprintf("api/v1/export/%v/?source=%v", pk, key)
+func (s *ExportService) Get(pk int) (*ExportDetail, *Response, error) {
+	url := fmt.Sprintf("api/v1/export/%v", pk)
 
 	req, err := s.client.NewRequest("GET", url, nil)
 

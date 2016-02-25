@@ -43,14 +43,14 @@ type Geoname struct {
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#lookup-geoname
-func (s *GeonamesService) Lookup(geom, key string) (*Geoname, *Response, error) {
+func (s *GeonamesService) Lookup(geom string) (*Geoname, *Response, error) {
 	if geom == "" {
 		return nil, nil, errors.New("Please provide a WKT geometry string")
 	}
 
 	v := url.Values{}
 	v.Set("geom", geom)
-	v.Add("source", key)
+	// v.Add("source", key)
 	vals := v.Encode()
 	qurl := fmt.Sprintf("api/v1/geoname/?%v", vals)
 

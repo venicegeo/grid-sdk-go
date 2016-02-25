@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-Package grid provides a client for using the GRiD API.
+package main
 
-Portions of the grid package borrow heavily from https://github.com/google/go-github, a Go library for accessing the GitHub API, which is released under a BSD-style license (https://github.com/google/go-github/blob/master/LICENSE).
-*/
-package grid
+import "github.com/venicegeo/grid-sdk-go/cli/grid/cmd"
+
+func main() {
+	cmd.Execute()
+}

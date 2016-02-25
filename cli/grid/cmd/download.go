@@ -17,36 +17,27 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/venicegeo/grid-sdk-go"
 )
 
-var lookupCmd = &cobra.Command{
-	Use:   "lookup [WKT geometry]...",
-	Short: "Get suggested AOI name",
+var pullCmd = &cobra.Command{
+	Use:   "pull [pk...]",
+	Short: "Download File",
 	Long: `
-Lookup is used to retrieve a suggested AOI name from GRiD's Geonames endpoint
-for each of the provided WKT geometries.`,
+Download the file(s) specified by the given primary key(s).`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			fmt.Println("Please provide a WKT geometry")
-			cmd.Usage()
-			return
-		}
-
-		// setup the GRiD client
-		tp := GetTransport()
-		client := grid.NewClient(tp.Client())
-		key := GetConfig().Key
-
-		for _, geom := range args {
-			// get and print the suggested name for the current geometry
-			a, _, err := client.Geonames.Lookup(geom, key)
+		for _, arg := range args {
+			pk, err := strconv.Atoi(arg)
 			if err != nil {
-				log.Fatal(err)
+				fmt.Printf("Error parsing \"%v\". Please provide primary keys as integers.\n\n", arg) // Continuing with remaining keys...\n\n", arg)
+				continue
 			}
-			fmt.Println(a.Name)
+			_, err = g.DownloadByPk(pk)
+			if err != nil {
+				log.Fatal(err.Error())
+			}
 		}
 	},
 }

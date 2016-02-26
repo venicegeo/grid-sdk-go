@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	defaultBaseURL = "https://rsgis.erdc.dren.mil/te_ba/"
+	defaultBaseURL = "https://gridte.rsgis.erdc.dren.mil/te_ba/"
 )
 
 // TODO(chambbj): We can probably simplify code by handling the API key at this

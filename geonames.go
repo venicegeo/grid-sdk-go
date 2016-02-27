@@ -15,8 +15,11 @@
 package grid
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 )
 
@@ -59,4 +62,38 @@ func (s *GeonamesService) Lookup(geom string) (*Geoname, *Response, error) {
 	name := new(Geoname)
 	resp, err := s.client.Do(req, name)
 	return name, resp, err
+}
+
+// Lookup looks up the suggested name for the given geometry.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#lookup-geoname
+func Lookup(geom string) (*Geoname, *HttpError) {
+	geoname := new(Geoname)
+	if geom == "" {
+		return geoname, &HttpError{Error: "Please provide a WKT geometry string", Status: http.StatusBadRequest}
+	}
+
+	v := url.Values{}
+	v.Set("geom", geom)
+	vals := v.Encode()
+	qurl := fmt.Sprintf("api/v1/geoname/?%v", vals)
+
+	request := GetRequestFactory().NewRequest("GET", qurl)
+
+	response, err := GetClient().Do(request)
+	if err != nil {
+		return nil, &HttpError{Error: err.Error(), Status: http.StatusInternalServerError}
+	}
+	defer response.Body.Close()
+	body, _ := ioutil.ReadAll(response.Body)
+
+	eo := ErrorCheck(&body)
+	if eo == nil {
+		err = json.Unmarshal(body, geoname)
+		if err != nil {
+			eo = &HttpError{Error: err.Error(), Status: http.StatusBadRequest}
+		}
+	}
+	return geoname, eo
 }

@@ -129,7 +129,9 @@ func printAOI(a *grid.AOIResponse) {
 }
 
 func printExport(a *grid.AOIItem) {
-	fmt.Println(a.AOIs[0].Fields.ClipGeometry)
+	for inx := 0; inx < len(a.AOIs); inx++ {
+		fmt.Println(a.AOIs[inx].Fields.ClipGeometry)
+	}
 	if len(a.ExportSet) > 0 {
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 8, 3, '\t', 0)

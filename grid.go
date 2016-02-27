@@ -246,3 +246,28 @@ func (t *BasicAuthTransport) transport() http.RoundTripper {
 	}
 	return http.DefaultTransport
 }
+
+// ErrorObject represents any error returnable by the GRiD service
+type ErrorObject struct {
+	Status string `json:"status"`
+	Error  string `json:"error"`
+}
+
+// HttpError represents any HTTP error
+type HttpError struct {
+	Status int    `json:"status"`
+	Error  string `json:"error"`
+}
+
+// ErrorCheck Unmarshals the result to determine if it is in fact an error
+// and returns the error information if needed
+func ErrorCheck(bytes *[]byte) *HttpError {
+	eo := new(ErrorObject)
+	err := json.Unmarshal(*bytes, eo)
+	if err != nil {
+		return &HttpError{Error: err.Error(), Status: http.StatusNotAcceptable}
+	} else if eo.Error == "" {
+		return nil
+	}
+	return &HttpError{Error: eo.Error, Status: http.StatusBadRequest}
+}

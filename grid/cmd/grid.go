@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -54,15 +55,46 @@ var versionCmd = &cobra.Command{
 	},
 }
 
+var config *Config
+
+type basicAuthDecorator struct {
+}
+
+func (bad basicAuthDecorator) Decorate(request *http.Request) {
+	config := getConfig()
+	request.Header.Set("Authorization", "Basic "+config.Auth)
+}
+
+type configSourceDecorator struct {
+}
+
+func (csd configSourceDecorator) Decorate(request *http.Request) {
+	config := getConfig()
+	query := request.URL.Query()
+	query.Add("source", config.Key)
+	request.URL.RawQuery = query.Encode()
+}
+
+type logDecorator struct {
+}
+
+func (ld logDecorator) Decorate(request *http.Request) {
+	var buffer bytes.Buffer
+	writer := bufio.NewWriter(&buffer)
+	request.Write(writer)
+	writer.Flush()
+	log.Printf(buffer.String())
+}
+
 // Execute adds all child commands to the root command GridCmd and sets flags
 // appropriately.
 func Execute() {
-	AddCommands()
+	addCommands()
+	setup()
 	GridCmd.Execute()
 }
 
-// AddCommands adds child commands to the root GridCmd.
-func AddCommands() {
+func addCommands() {
 	GridCmd.AddCommand(addCmd)
 	GridCmd.AddCommand(configureCmd)
 	GridCmd.AddCommand(lookupCmd)
@@ -71,6 +103,17 @@ func AddCommands() {
 	GridCmd.AddCommand(versionCmd)
 }
 
+const (
+	defaultBaseURL = "https://gridte.rsgis.erdc.dren.mil/te_ba/"
+)
+
+func setup() {
+	rf := grid.GetRequestFactory()
+	rf.BaseURL = defaultBaseURL
+	rf.AddDecorator(new(basicAuthDecorator))
+	rf.AddDecorator(new(configSourceDecorator))
+	rf.AddDecorator(new(logDecorator))
+}
 func init() {
 	gridCmdV = GridCmd
 }
@@ -97,9 +140,11 @@ type Config struct {
 	Key  string `json:"key"`
 }
 
-// GetTransport is provided as a convenience to setup the GRiD
-// BasicAuthTransport with Basic Authorization string and API key.
-func GetTransport() grid.BasicAuthTransport {
+func getConfig() *Config {
+	if config != nil {
+		return config
+	}
+
 	var path string
 	if runtime.GOOS == "windows" {
 		path = os.Getenv("HOMEPATH")
@@ -112,9 +157,16 @@ func GetTransport() grid.BasicAuthTransport {
 	if err != nil {
 		log.Fatal("No authentication. Please run 'grid configure' first.")
 	}
-	var config Config
 	b, err := ioutil.ReadAll(file)
 	json.Unmarshal(b, &config)
+	return config
+}
+
+// GetTransport is provided as a convenience to setup the GRiD
+// BasicAuthTransport with Basic Authorization string and API key.
+func GetTransport() grid.BasicAuthTransport {
+
+	config := getConfig()
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},

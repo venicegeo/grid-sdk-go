@@ -15,7 +15,10 @@
 package grid
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 )
 
@@ -155,4 +158,46 @@ func (s *AOIService) Add(name, geom string, subscribe bool) (*AddAOIResponse, *R
 	addAOIResponse := new(AddAOIResponse)
 	resp, err := s.client.Do(req, addAOIResponse)
 	return addAOIResponse, resp, err
+}
+
+// AddAOI uploads the given geometry to create a new AOI.
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#add-aoi
+func AddAOI(name, geom string, subscribe bool) (*AddAOIResponse, *HttpError) {
+	addAOIResponse := new(AddAOIResponse)
+	if name == "" {
+		return addAOIResponse, &HttpError{Error: "Please provide an AOI name and WKT geometry string", Status: http.StatusBadRequest}
+	}
+
+	if geom == "" {
+		return addAOIResponse, &HttpError{Error: "Please provide a WKT geometry string", Status: http.StatusBadRequest}
+	}
+
+	v := url.Values{}
+	v.Set("geom", geom)
+	v.Add("name", name)
+	if subscribe {
+		v.Add("subscribe", "True")
+	}
+	vals := v.Encode()
+	qurl := fmt.Sprintf("api/v1/aoi/add/?%v", vals)
+
+	request := GetRequestFactory().NewRequest("GET", qurl)
+
+	response, err := GetClient().Do(request)
+	if err != nil {
+		return nil, &HttpError{Error: err.Error(), Status: http.StatusInternalServerError}
+	}
+	defer response.Body.Close()
+	body, _ := ioutil.ReadAll(response.Body)
+
+	eo := ErrorCheck(&body)
+	if eo == nil {
+		err = json.Unmarshal(body, addAOIResponse)
+		if err != nil {
+			eo = &HttpError{Error: err.Error(), Status: http.StatusBadRequest}
+		}
+	}
+	return addAOIResponse, eo
 }

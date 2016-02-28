@@ -39,24 +39,15 @@ automatically uses the returned values as the AOI names.`,
 			return
 		}
 
-		// // setup the GRiD client
-		// tp := GetTransport()
-		// client := grid.NewClient(tp.Client())
-
 		for _, geom := range args {
 			// get suggested name for the current geometry
 			geoname, err := grid.Lookup(geom)
 			if err != nil {
 				log.Fatal(err)
 			}
-			// a, _, err := client.Geonames.Lookup(geom)
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
 
 			// create a new AOI for the current geometry with suggested name
 			aoi, err := grid.AddAOI(geoname.Name, geom, true)
-			// b, _, err := client.AOI.Add(a.Name, geom, true)
 			if err != nil {
 				log.Fatal(err)
 			}

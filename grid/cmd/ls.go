@@ -75,12 +75,8 @@ AOIs.`,
 }
 
 func getAOIs() interface{} {
-	// setup the GRiD client
-	tp := GetTransport()
-	client := grid.NewClient(tp.Client())
-
 	// get the full list of AOIs
-	a, _, err := client.AOI.List("")
+	a, err := grid.ListAOIs("")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -89,12 +85,8 @@ func getAOIs() interface{} {
 }
 
 func getExports(pk int) interface{} {
-	// setup the GRiD client
-	tp := GetTransport()
-	client := grid.NewClient(tp.Client())
-
 	// get information on the AOI specified by the given primary key
-	a, _, err := client.AOI.Get(pk)
+	a, err := grid.GetAOI(pk)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -103,12 +95,8 @@ func getExports(pk int) interface{} {
 }
 
 func getExportFiles(pk int) interface{} {
-	// setup the GRiD client
-	tp := GetTransport()
-	client := grid.NewClient(tp.Client())
-
 	// get information on the export specified by the given primary key
-	a, _, err := client.Export.Get(pk)
+	a, err := grid.GetExport(pk)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

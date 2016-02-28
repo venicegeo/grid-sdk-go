@@ -15,22 +15,10 @@
 package grid
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 )
-
-// AOIService handles communication with the AOI related
-// methods of the GRiD API.
-//
-// GRiD API docs:
-// https://github.com/CRREL/GRiD-API/blob/v0.0/composed_api.rst#get-a-users-aoi-list
-// https://github.com/CRREL/GRiD-API/blob/v0.0/composed_api.rst#get-aoi-details
-type AOIService struct {
-	client *Client
-}
 
 // Export represents the export object that is returned as part of an AOIItem.
 //
@@ -111,67 +99,51 @@ type AOIResponse map[string]AOIItem
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#aoi-detail-object
 type AddAOIResponse map[string]interface{}
 
-// List retrieves all AOIs intersecting the optional geometry.
+// ListAOIs retrieves all AOIs intersecting the optional geometry.
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#get-a-users-aoi-list
-func (s *AOIService) List(geom string) (*AOIResponse, *Response, error) {
+func ListAOIs(geom string) (*AOIResponse, error) {
 	url := "api/v1/aoi"
 
-	req, err := s.client.NewRequest("GET", url, nil)
-
+	if geom != "" {
+		return nil, &HTTPError{Status: http.StatusNotImplemented, Text: "This method does not currently accept geometries."}
+	}
 	aoiList := new(AOIResponse)
-	resp, err := s.client.Do(req, aoiList)
-	return aoiList, resp, err
+	request := GetRequestFactory().NewRequest("GET", url)
+
+	err := DoRequest(request, aoiList)
+	return aoiList, err
 }
 
-// Get returns AOI details for the AOI specified by the user-provided primary
+// GetAOI returns AOI details for the AOI specified by the user-provided primary
 // key.
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#get-aoi-details
-func (s *AOIService) Get(pk int) (*AOIItem, *Response, error) {
+func GetAOI(pk int) (*AOIItem, error) {
 	url := fmt.Sprintf("api/v1/aoi/%v", pk)
 
-	req, err := s.client.NewRequest("GET", url, nil)
-
 	aoiDetail := new(AOIItem)
-	resp, err := s.client.Do(req, aoiDetail)
-	return aoiDetail, resp, err
-}
+	request := GetRequestFactory().NewRequest("GET", url)
 
-// Add uploads the given geometry to create a new AOI.
-//
-// GRiD API docs:
-// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#add-aoi
-func (s *AOIService) Add(name, geom string, subscribe bool) (*AddAOIResponse, *Response, error) {
-	v := url.Values{}
-	v.Set("geom", geom)
-	v.Add("name", name)
-	if subscribe {
-		v.Add("subscribe", "True")
-	}
-	vals := v.Encode()
-	qurl := fmt.Sprintf("api/v1/aoi/add/?%v", vals)
+	err := DoRequest(request, aoiDetail)
 
-	req, err := s.client.NewRequest("GET", qurl, nil)
-	addAOIResponse := new(AddAOIResponse)
-	resp, err := s.client.Do(req, addAOIResponse)
-	return addAOIResponse, resp, err
+	return aoiDetail, err
 }
 
 // AddAOI uploads the given geometry to create a new AOI.
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#add-aoi
-func AddAOI(name, geom string, subscribe bool) (*AddAOIResponse, *HttpError) {
+func AddAOI(name, geom string, subscribe bool) (*AddAOIResponse, error) {
 	addAOIResponse := new(AddAOIResponse)
 	if name == "" {
-		return addAOIResponse, &HttpError{Error: "Please provide an AOI name and WKT geometry string", Status: http.StatusBadRequest}
+		return addAOIResponse, &HTTPError{Text: "Please provide an AOI name and WKT geometry string", Status: http.StatusBadRequest}
 	}
 
 	if geom == "" {
-		return addAOIResponse, &HttpError{Error: "Please provide a WKT geometry string", Status: http.StatusBadRequest}
+		return addAOIResponse, &HTTPError{Text: "Please provide a WKT geometry string", Status: http.StatusBadRequest}
 	}
 
 	v := url.Values{}
@@ -185,19 +157,7 @@ func AddAOI(name, geom string, subscribe bool) (*AddAOIResponse, *HttpError) {
 
 	request := GetRequestFactory().NewRequest("GET", qurl)
 
-	response, err := GetClient().Do(request)
-	if err != nil {
-		return nil, &HttpError{Error: err.Error(), Status: http.StatusInternalServerError}
-	}
-	defer response.Body.Close()
-	body, _ := ioutil.ReadAll(response.Body)
+	err := DoRequest(request, addAOIResponse)
 
-	eo := ErrorCheck(&body)
-	if eo == nil {
-		err = json.Unmarshal(body, addAOIResponse)
-		if err != nil {
-			eo = &HttpError{Error: err.Error(), Status: http.StatusBadRequest}
-		}
-	}
-	return addAOIResponse, eo
+	return addAOIResponse, err
 }

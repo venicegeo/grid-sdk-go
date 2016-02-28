@@ -17,16 +17,9 @@ package grid
 import (
 	"fmt"
 	"mime"
+	"net/http"
 	"os"
 )
-
-// ExportService handles communication with the Export related
-// methods of the GRiD API.
-//
-// GRiD API docs: https://github.com/CRREL/GRiD-API/blob/v0.0/composed_api.rst#get-export-details
-type ExportService struct {
-	client *Client
-}
 
 // ExportFile represents the export file object that is returned by the export
 // endpoint.
@@ -63,43 +56,45 @@ type ExportDetail struct {
 	TDASets     []TDASet     `json:"tda_set,omitempty"`
 }
 
-// Get returns export details for the export specified by the user-provided
+// GetExport returns export details for the export specified by the user-provided
 // primary key.
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#get-export-details
-func (s *ExportService) Get(pk int) (*ExportDetail, *Response, error) {
+func GetExport(pk int) (*ExportDetail, error) {
 	url := fmt.Sprintf("api/v1/export/%v", pk)
 
-	req, err := s.client.NewRequest("GET", url, nil)
-
 	exportDetail := new(ExportDetail)
-	resp, err := s.client.Do(req, exportDetail)
-	return exportDetail, resp, err
+	request := GetRequestFactory().NewRequest("GET", url)
+
+	err := DoRequest(request, exportDetail)
+
+	return exportDetail, err
 }
 
 // DownloadByPk downloads the file specified by the user-provided primary key.
-func (s *ExportService) DownloadByPk(pk int) (*Response, error) {
+func DownloadByPk(pk int) (*http.Response, error) {
 	url := fmt.Sprintf("export/download/file/%v/", pk)
 
-	req, err := s.client.NewRequest("GET", url, nil)
-
+	var response *http.Response
+	request := GetRequestFactory().NewRequest("GET", url)
 	file, err := os.Create("temp")
 	if err != nil {
-		panic(err)
+		return response, err
 	}
 	defer file.Close()
-	resp, err := s.client.Do(req, file)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
 
-	cd := resp.Header.Get("Content-Disposition")
+	response, err = GetClient().Do(request)
+	if err != nil {
+		return response, &HTTPError{Text: err.Error(), Status: http.StatusInternalServerError}
+	}
+	defer response.Body.Close()
+
+	cd := response.Header.Get("Content-Disposition")
 	_, params, err := mime.ParseMediaType(cd)
 	if err != nil {
-		panic(err)
+		return response, err
 	}
 	err = os.Rename(file.Name(), params["filename"])
-	return resp, err
+	return response, err
 }

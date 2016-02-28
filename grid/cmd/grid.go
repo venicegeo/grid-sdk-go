@@ -17,7 +17,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -160,23 +159,4 @@ func getConfig() *Config {
 	b, err := ioutil.ReadAll(file)
 	json.Unmarshal(b, &config)
 	return config
-}
-
-// GetTransport is provided as a convenience to setup the GRiD
-// BasicAuthTransport with Basic Authorization string and API key.
-func GetTransport() grid.BasicAuthTransport {
-
-	config := getConfig()
-
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	tp := grid.BasicAuthTransport{
-		Auth:      config.Auth,
-		Key:       config.Key,
-		Transport: tr,
-	}
-
-	return tp
 }

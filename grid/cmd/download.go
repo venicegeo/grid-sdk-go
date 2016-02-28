@@ -27,12 +27,8 @@ var pullCmd = &cobra.Command{
 	Long: `
 Download the file(s) specified by the given primary key(s).`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// setup the GRiD client
-		tp := GetTransport()
-		client := grid.NewClient(tp.Client())
-
 		// TODO(chambbj): allow for multiple pks/downloads
-		_, err := client.Export.DownloadByPk(pk)
+		_, err := grid.DownloadByPk(pk)
 		if err != nil {
 			log.Fatal(err.Error())
 		}

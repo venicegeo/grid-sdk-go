@@ -86,7 +86,7 @@ func DownloadByPk(pk int) (*http.Response, error) {
 
 	response, err = GetClient().Do(request)
 	if err != nil {
-		return response, &HTTPError{Text: err.Error(), Status: http.StatusInternalServerError}
+		return response, &HTTPError{Message: err.Error(), Status: http.StatusInternalServerError}
 	}
 	defer response.Body.Close()
 

@@ -47,10 +47,10 @@ type ErrorObject struct {
 
 // HTTPError represents any HTTP error
 type HTTPError struct {
-	Status int
-	Text   string
+	Status  int
+	Message string
 }
 
 func (err HTTPError) Error() string {
-	return fmt.Sprintf("%d: %v", err.Status, err.Text)
+	return fmt.Sprintf("%d: %v", err.Status, err.Message)
 }

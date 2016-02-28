@@ -23,7 +23,7 @@ import (
 
 // RequestDecorator decorates an http.Request
 type RequestDecorator interface {
-	Decorate(*http.Request)
+	Decorate(*http.Request) error
 }
 
 // RequestFactory creates http.Request decorated as needed
@@ -65,11 +65,11 @@ func ErrorCheck(bytes *[]byte) error {
 	eo := new(ErrorObject)
 	err := json.Unmarshal(*bytes, eo)
 	if err != nil {
-		return &HTTPError{Text: err.Error(), Status: http.StatusNotAcceptable}
+		return &HTTPError{Message: err.Error(), Status: http.StatusNotAcceptable}
 	} else if eo.Error == "" {
 		return nil
 	}
-	return &HTTPError{Text: eo.Error, Status: http.StatusBadRequest}
+	return &HTTPError{Message: eo.Error, Status: http.StatusBadRequest}
 }
 
 // DoRequest performs the request and handles attempts to unmarshal the response
@@ -77,7 +77,7 @@ func ErrorCheck(bytes *[]byte) error {
 func DoRequest(request *http.Request, unmarshal interface{}) error {
 	response, err := GetClient().Do(request)
 	if err != nil {
-		return &HTTPError{Text: err.Error(), Status: http.StatusInternalServerError}
+		return &HTTPError{Message: err.Error(), Status: http.StatusInternalServerError}
 	}
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
@@ -86,7 +86,7 @@ func DoRequest(request *http.Request, unmarshal interface{}) error {
 	if eo == nil {
 		err = json.Unmarshal(body, unmarshal)
 		if err != nil {
-			eo = &HTTPError{Text: err.Error(), Status: http.StatusBadRequest}
+			eo = &HTTPError{Message: err.Error(), Status: http.StatusBadRequest}
 		}
 	}
 	return eo

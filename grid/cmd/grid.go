@@ -19,12 +19,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"syscall"
 
@@ -32,6 +29,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/venicegeo/grid-sdk-go"
+	"github.com/venicegeo/pzsvc-sdk-go"
 )
 
 // GridCmd is Grid's root command. Every other command attached to GridCmd is a
@@ -59,30 +57,33 @@ var config *Config
 type basicAuthDecorator struct {
 }
 
-func (bad basicAuthDecorator) Decorate(request *http.Request) {
+func (bad basicAuthDecorator) Decorate(request *http.Request) error {
 	config := getConfig()
 	request.Header.Set("Authorization", "Basic "+config.Auth)
+	return nil
 }
 
 type configSourceDecorator struct {
 }
 
-func (csd configSourceDecorator) Decorate(request *http.Request) {
+func (csd configSourceDecorator) Decorate(request *http.Request) error {
 	config := getConfig()
 	query := request.URL.Query()
 	query.Add("source", config.Key)
 	request.URL.RawQuery = query.Encode()
+	return nil
 }
 
 type logDecorator struct {
 }
 
-func (ld logDecorator) Decorate(request *http.Request) {
+func (ld logDecorator) Decorate(request *http.Request) error {
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
 	request.Write(writer)
 	writer.Flush()
 	log.Printf(buffer.String())
+	return nil
 }
 
 // Execute adds all child commands to the root command GridCmd and sets flags
@@ -144,19 +145,10 @@ func getConfig() *Config {
 		return config
 	}
 
-	var path string
-	if runtime.GOOS == "windows" {
-		path = os.Getenv("HOMEPATH")
-	} else {
-		path = os.Getenv("HOME")
-	}
-	path = path + string(filepath.Separator) + ".grid"
-	fileandpath := path + string(filepath.Separator) + "config.json"
-	file, err := os.Open(fileandpath)
+	b, err := sdk.GetConfig("grid")
 	if err != nil {
 		log.Fatal("No authentication. Please run 'grid configure' first.")
 	}
-	b, err := ioutil.ReadAll(file)
 	json.Unmarshal(b, &config)
 	return config
 }

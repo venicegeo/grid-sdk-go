@@ -37,7 +37,7 @@ type Geoname struct {
 func Lookup(geom string) (*Geoname, error) {
 	geoname := new(Geoname)
 	if geom == "" {
-		return geoname, &HTTPError{Text: "Please provide a WKT geometry string", Status: http.StatusBadRequest}
+		return geoname, &HTTPError{Message: "Please provide a WKT geometry string", Status: http.StatusBadRequest}
 	}
 
 	v := url.Values{}

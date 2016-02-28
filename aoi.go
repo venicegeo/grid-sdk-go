@@ -107,7 +107,7 @@ func ListAOIs(geom string) (*AOIResponse, error) {
 	url := "api/v1/aoi"
 
 	if geom != "" {
-		return nil, &HTTPError{Status: http.StatusNotImplemented, Text: "This method does not currently accept geometries."}
+		return nil, &HTTPError{Status: http.StatusNotImplemented, Message: "This method does not currently accept geometries."}
 	}
 	aoiList := new(AOIResponse)
 	request := GetRequestFactory().NewRequest("GET", url)
@@ -139,11 +139,11 @@ func GetAOI(pk int) (*AOIItem, error) {
 func AddAOI(name, geom string, subscribe bool) (*AddAOIResponse, error) {
 	addAOIResponse := new(AddAOIResponse)
 	if name == "" {
-		return addAOIResponse, &HTTPError{Text: "Please provide an AOI name and WKT geometry string", Status: http.StatusBadRequest}
+		return addAOIResponse, &HTTPError{Message: "Please provide an AOI name and WKT geometry string", Status: http.StatusBadRequest}
 	}
 
 	if geom == "" {
-		return addAOIResponse, &HTTPError{Text: "Please provide a WKT geometry string", Status: http.StatusBadRequest}
+		return addAOIResponse, &HTTPError{Message: "Please provide a WKT geometry string", Status: http.StatusBadRequest}
 	}
 
 	v := url.Values{}

@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // Export represents the export object that is returned as part of an AOIItem.
@@ -84,6 +85,15 @@ type AOIItem struct {
 	RasterCollects     []RasterCollect     `json:"raster_collects,omitempty"`
 	PointcloudCollects []PointcloudCollect `json:"pointcloud_collects,omitempty"`
 	AOIs               []AOI               `json:"aoi,omitempty"`
+}
+
+// GenerateExportObject represents the output from a Generate Export operation
+//
+// GTiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#generate-export-object
+type GenerateExportObject struct {
+	Started bool   `json:"started,omitempty"`
+	TaskID  string `json:"task_id,omitempty"`
 }
 
 // AOIResponse represents the collection of AOIItems returned by the AOI list
@@ -159,4 +169,21 @@ func AddAOI(name, geom string, subscribe bool) (*AddAOIResponse, error) {
 	err := DoRequest(request, addAOIResponse)
 
 	return addAOIResponse, err
+}
+
+// GeneratePointCloudExport does just that for the given PK and set of collects
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#generate-point-cloud-export
+func GeneratePointCloudExport(pk int, collects []string) (*GenerateExportObject, error) {
+	geo := new(GenerateExportObject)
+	v := url.Values{}
+
+	v.Set("collects", strings.Join(collects, ","))
+	vals := v.Encode()
+	url := fmt.Sprintf("api/v1/aoi/%v/generate/pointcloud/?%v", pk, vals)
+	request := GetRequestFactory().NewRequest("GET", url)
+
+	err := DoRequest(request, geo)
+	return geo, err
 }

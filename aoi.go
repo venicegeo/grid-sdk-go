@@ -122,13 +122,12 @@ func ListAOIs(geom string) (*AOIResponse, error) {
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#get-aoi-details
 func GetAOI(pk int) (*AOIItem, error) {
-	url := fmt.Sprintf("api/v1/aoi/%v", pk)
+	url := fmt.Sprintf("api/v1/aoi/%v/", pk)
 
 	aoiDetail := new(AOIItem)
 	request := GetRequestFactory().NewRequest("GET", url)
 
 	err := DoRequest(request, aoiDetail)
-
 	return aoiDetail, err
 }
 

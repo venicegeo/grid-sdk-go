@@ -112,7 +112,7 @@ func setup() {
 	rf.BaseURL = defaultBaseURL
 	rf.AddDecorator(new(basicAuthDecorator))
 	rf.AddDecorator(new(configSourceDecorator))
-	rf.AddDecorator(new(logDecorator))
+	// rf.AddDecorator(new(logDecorator))
 }
 func init() {
 	gridCmdV = GridCmd

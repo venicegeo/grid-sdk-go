@@ -51,8 +51,22 @@ AOIs.`,
 			}
 
 			c := make(chan interface{})
-			go func() { c <- getExports(pk) }()
-			go func() { c <- getExportFiles(pk) }()
+			go func() {
+				exports, err := grid.GetAOI(pk)
+				if err == nil {
+					c <- exports
+				} else {
+					c <- err
+				}
+			}()
+			go func() {
+				exportFiles, err := grid.GetExport(pk)
+				if err == nil {
+					c <- exportFiles
+				} else {
+					c <- err
+				}
+			}()
 
 			for i := 0; i < 2; i++ {
 				result := <-c
@@ -67,8 +81,10 @@ AOIs.`,
 				printExport(u)
 			case *grid.ExportDetail:
 				printExportFile(u)
+			case error:
+				// log.Print(u.Error())
 			default:
-				fmt.Println("unknown")
+				//NOOP fmt.Println("unknown")
 			}
 		}
 	},
@@ -77,26 +93,6 @@ AOIs.`,
 func getAOIs() interface{} {
 	// get the full list of AOIs
 	a, err := grid.ListAOIs("")
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	return a
-}
-
-func getExports(pk int) interface{} {
-	// get information on the AOI specified by the given primary key
-	a, err := grid.GetAOI(pk)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	return a
-}
-
-func getExportFiles(pk int) interface{} {
-	// get information on the export specified by the given primary key
-	a, err := grid.GetExport(pk)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

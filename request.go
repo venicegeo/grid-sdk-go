@@ -16,7 +16,9 @@ package grid
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -59,35 +61,42 @@ func (rf *RequestFactory) NewRequest(method, relativeURL string) *http.Request {
 	return request
 }
 
-// ErrorCheck Unmarshals the result to determine if it is in fact an error
-// and returns the error information if needed
-func ErrorCheck(bytes *[]byte) error {
-	eo := new(ErrorObject)
-	err := json.Unmarshal(*bytes, eo)
-	if err != nil {
-		return &HTTPError{Message: err.Error(), Status: http.StatusNotAcceptable}
-	} else if eo.Error == "" {
-		return nil
-	}
-	return &HTTPError{Message: eo.Error, Status: http.StatusBadRequest}
-}
-
-// DoRequest performs the request and handles attempts to unmarshal the response
+// DoRequest performs the request and attempts to unmarshal the response
 // into the object provided
 func DoRequest(request *http.Request, unmarshal interface{}) error {
 	response, err := GetClient().Do(request)
 	if err != nil {
+		// log.Printf("DoRequest failed to Do the request")
 		return &HTTPError{Message: err.Error(), Status: http.StatusInternalServerError}
 	}
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
 
-	eo := ErrorCheck(&body)
-	if eo == nil {
-		err = json.Unmarshal(body, unmarshal)
-		if err != nil {
-			eo = &HTTPError{Message: err.Error(), Status: http.StatusBadRequest}
-		}
+	// Check for HTTP errors
+	if response.StatusCode < 200 || response.StatusCode > 299 {
+		message := fmt.Sprintf("%v returned %v", response.Request.URL.String(), string(body))
+		return &HTTPError{Message: message, Status: response.StatusCode}
 	}
-	return eo
+
+	// Unmarshal the result to determine if it is in fact an error
+	// masquerading as a StatusOK
+	eo := new(ErrorObject)
+	err = json.Unmarshal(body, eo)
+	if err != nil {
+		log.Printf("Unmarshal error in ErrorCheck: %v", string(body))
+		return &HTTPError{Message: err.Error(), Status: http.StatusNotAcceptable}
+	} else if eo.Error != "" {
+		// log.Printf("ErrorCheck discovered %v", eo.Error)
+		return &HTTPError{Message: eo.Error, Status: http.StatusBadRequest}
+	}
+
+	// log.Printf("Body: %v", string(body))
+
+	// If we've gotten this far, hopefully we can unmarshal properly
+	err = json.Unmarshal(body, unmarshal)
+	if err != nil {
+		log.Printf("Unmarshal error in DoRequest: %v", string(body))
+		return &HTTPError{Message: err.Error(), Status: http.StatusNotAcceptable}
+	}
+	return nil
 }

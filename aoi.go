@@ -120,7 +120,7 @@ func NewGeneratePointCloudExportOptions() *GeneratePointCloudExportOptions {
 	return &GeneratePointCloudExportOptions{
 		Intensity:         true,
 		DimClassification: true,
-		FileExportOptions: "individual",
+		FileExportOptions: "collect", // Note: this overrides the GRiD default
 		Compressed:        true,
 		SendEmail:         false,
 		GenerateDem:       false,
@@ -209,6 +209,9 @@ func AddAOI(name, geom string, subscribe bool) (*AddAOIResponse, error) {
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#generate-point-cloud-export
 func GeneratePointCloudExport(pk int, collects []string, options *GeneratePointCloudExportOptions) (*GenerateExportObject, error) {
 	geo := new(GenerateExportObject)
+	if options == nil {
+		options = NewGeneratePointCloudExportOptions()
+	}
 	v := url.Values{}
 	for inx := 0; inx < len(collects); inx++ {
 		v.Add("collects", collects[inx])

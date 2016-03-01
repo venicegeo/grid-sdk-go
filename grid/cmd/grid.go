@@ -97,9 +97,11 @@ func Execute() {
 func addCommands() {
 	GridCmd.AddCommand(addCmd)
 	GridCmd.AddCommand(configureCmd)
+	GridCmd.AddCommand(exportCmd)
 	GridCmd.AddCommand(lookupCmd)
 	GridCmd.AddCommand(lsCmd)
 	GridCmd.AddCommand(pullCmd)
+	GridCmd.AddCommand(taskCmd)
 	GridCmd.AddCommand(versionCmd)
 }
 

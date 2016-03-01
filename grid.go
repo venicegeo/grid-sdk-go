@@ -45,6 +45,18 @@ type ErrorObject struct {
 	Error  string `json:"error"`
 }
 
+// TaskObject represents the state of a GRiD task
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#task-object
+type TaskObject struct {
+	Traceback string `json:"task_traceback,omitempty"`
+	State     string `json:"task_state,omitempty"`
+	Timestamp string `json:"task_tstamp,omitempty"`
+	Name      string `json:"task_name,omitempty"`
+	TaskID    string `json:"task_id,omitempty"`
+}
+
 // HTTPError represents any HTTP error
 type HTTPError struct {
 	Status  int
@@ -53,4 +65,17 @@ type HTTPError struct {
 
 func (err HTTPError) Error() string {
 	return fmt.Sprintf("%d: %v", err.Status, err.Message)
+}
+
+// TaskDetails returns the details for a GRiD task
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#generate-point-cloud-export
+func TaskDetails(pk int) (*TaskObject, error) {
+	taskObject := new(TaskObject)
+	url := fmt.Sprintf("api/v1/task/%v", pk)
+	request := GetRequestFactory().NewRequest("GET", url)
+
+	err := DoRequest(request, taskObject)
+	return taskObject, err
 }

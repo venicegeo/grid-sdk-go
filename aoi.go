@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 // Export represents the export object that is returned as part of an AOIItem.
@@ -92,8 +91,41 @@ type AOIItem struct {
 // GTiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#generate-export-object
 type GenerateExportObject struct {
-	Started bool   `json:"started,omitempty"`
-	TaskID  string `json:"task_id,omitempty"`
+	Started  bool   `json:"started,omitempty"`
+	TaskID   string `json:"task_id,omitempty"`
+	ExportID int    `json:"export_id,omitempty"`
+}
+
+// GeneratePointCloudExportOptions represents the options for a
+// Generate Point Cloud Export Operation
+//
+// GRiD API docs:
+// https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#generate-point-cloud-export
+type GeneratePointCloudExportOptions struct {
+	Intensity         bool
+	DimClassification bool
+	Hsrs              string //EPSG code
+	FileExportOptions string //individual or collect
+	Compressed        bool
+	SendEmail         bool
+	GenerateDem       bool
+	CellSpacing       float32
+	PclTerrain        string  // urban, mountainous, suburban, or foliated
+	SriHResolution    float32 // Horizontal resolution
+}
+
+// NewGeneratePointCloudExportOptions is a factory method for a
+// GeneratePointCloudExportOptions that provides all defaults
+func NewGeneratePointCloudExportOptions() *GeneratePointCloudExportOptions {
+	return &GeneratePointCloudExportOptions{
+		Intensity:         true,
+		DimClassification: true,
+		FileExportOptions: "individual",
+		Compressed:        true,
+		SendEmail:         false,
+		GenerateDem:       false,
+		CellSpacing:       1.0,
+	}
 }
 
 // AOIResponse represents the collection of AOIItems returned by the AOI list
@@ -175,11 +207,44 @@ func AddAOI(name, geom string, subscribe bool) (*AddAOIResponse, error) {
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#generate-point-cloud-export
-func GeneratePointCloudExport(pk int, collects []string) (*GenerateExportObject, error) {
+func GeneratePointCloudExport(pk int, collects []string, options *GeneratePointCloudExportOptions) (*GenerateExportObject, error) {
 	geo := new(GenerateExportObject)
 	v := url.Values{}
-
-	v.Set("collects", strings.Join(collects, ","))
+	for inx := 0; inx < len(collects); inx++ {
+		v.Add("collects", collects[inx])
+	}
+	if !options.Compressed {
+		v.Set("compressed", "False")
+	}
+	if !options.DimClassification {
+		v.Set("dim_classification", "False")
+	}
+	if options.FileExportOptions != "" {
+		v.Set("file_export_options", options.FileExportOptions)
+	}
+	if options.GenerateDem {
+		v.Set("generate_dem", "True")
+		if options.CellSpacing != 1.0 {
+			cellSpacing := fmt.Sprintf("%f", options.CellSpacing)
+			v.Set("cell_spacing", cellSpacing)
+		}
+	}
+	if options.Hsrs != "" {
+		v.Set("hsrs", options.Hsrs)
+	}
+	if !options.Intensity {
+		v.Set("intensity", "False")
+	}
+	if options.PclTerrain != "" {
+		v.Set("pcl_terrain", options.PclTerrain)
+	}
+	if options.SendEmail {
+		v.Set("send_email", "True")
+	}
+	if options.SriHResolution != 0 {
+		srihres := fmt.Sprintf("%f", options.SriHResolution)
+		v.Set("sri_hres", srihres)
+	}
 	vals := v.Encode()
 	url := fmt.Sprintf("api/v1/aoi/%v/generate/pointcloud/?%v", pk, vals)
 	request := GetRequestFactory().NewRequest("GET", url)

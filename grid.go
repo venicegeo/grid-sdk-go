@@ -71,9 +71,9 @@ func (err HTTPError) Error() string {
 //
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#generate-point-cloud-export
-func TaskDetails(pk int) (*TaskObject, error) {
+func TaskDetails(pk string) (*TaskObject, error) {
 	taskObject := new(TaskObject)
-	url := fmt.Sprintf("api/v1/task/%v", pk)
+	url := fmt.Sprintf("api/v1/task/%v/", pk)
 	request := GetRequestFactory().NewRequest("GET", url)
 
 	err := DoRequest(request, taskObject)

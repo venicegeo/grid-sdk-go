@@ -15,7 +15,9 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	"github.com/venicegeo/grid-sdk-go"
@@ -28,14 +30,19 @@ var pullCmd = &cobra.Command{
 Download the file(s) specified by the given primary key(s).`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO(chambbj): allow for multiple pks/downloads
-		_, err := grid.DownloadByPk(pk)
+		if len(args) == 0 {
+			fmt.Println("Please provide a primary key for the file to download.")
+			cmd.Usage()
+			return
+		}
+
+		pk, err := strconv.Atoi(args[0])
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		_, err = grid.DownloadByPk(pk)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 	},
-}
-
-// TODO(chambbj): pass pk(s) as argument(s), as with the other commands
-func init() {
-	pullCmd.Flags().IntVarP(&pk, "pk", "", 0, "Primary key")
 }

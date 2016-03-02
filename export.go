@@ -16,6 +16,8 @@ package grid
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"mime"
 	"net/http"
 	"os"
@@ -88,13 +90,15 @@ func DownloadByPk(pk int) (*http.Response, error) {
 	if err != nil {
 		return response, &HTTPError{Message: err.Error(), Status: http.StatusInternalServerError}
 	}
-	defer response.Body.Close()
-
 	cd := response.Header.Get("Content-Disposition")
 	_, params, err := mime.ParseMediaType(cd)
 	if err != nil {
-		return response, err
+		// This generally means a broader error which is hopefully contained in the body
+		defer response.Body.Close()
+		body, _ := ioutil.ReadAll(response.Body)
+		return response, &HTTPError{Message: string(body), Status: http.StatusNotAcceptable}
 	}
 	err = os.Rename(file.Name(), params["filename"])
+	log.Printf("Downloaded %v", params["filename"])
 	return response, err
 }

@@ -146,7 +146,7 @@ type AddAOIResponse map[string]interface{}
 // GRiD API docs:
 // https://github.com/CRREL/GRiD-API/blob/master/composed_api.rst#get-a-users-aoi-list
 func ListAOIs(geom string) (*AOIResponse, error) {
-	url := "api/v1/aoi"
+	url := "api/v1/aoi/"
 
 	if geom != "" {
 		return nil, &HTTPError{Status: http.StatusNotImplemented, Message: "This method does not currently accept geometries."}

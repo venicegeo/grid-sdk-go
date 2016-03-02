@@ -23,6 +23,7 @@ import (
 	"runtime"
 
 	"github.com/spf13/cobra"
+	"github.com/venicegeo/grid-sdk-go"
 )
 
 var configureCmd = &cobra.Command{
@@ -63,7 +64,7 @@ is encoded in the user's config.json file`,
 		auth := base64.StdEncoding.EncodeToString([]byte(un + ":" + pw))
 
 		// encode the configuration details as JSON
-		config := Config{Auth: auth, Key: key}
+		config := grid.Config{Auth: auth, Key: key}
 		json.NewEncoder(file).Encode(config)
 	},
 }

@@ -21,6 +21,8 @@ import (
 	"mime"
 	"net/http"
 	"os"
+
+	"github.com/venicegeo/pzsvc-sdk-go"
 )
 
 // ExportFile represents the export file object that is returned by the export
@@ -67,9 +69,10 @@ func GetExport(pk int) (*ExportDetail, error) {
 	url := fmt.Sprintf("api/v1/export/%v/", pk)
 
 	exportDetail := new(ExportDetail)
-	request := GetRequestFactory().NewRequest("GET", url)
+	request := sdk.GetRequestFactory().NewRequest("GET", url)
+	drc := doRequestCallback{unmarshal: exportDetail}
 
-	err := DoRequest(request, exportDetail)
+	err := sdk.DoRequest(request, drc)
 
 	return exportDetail, err
 }
@@ -79,7 +82,7 @@ func DownloadByPk(pk int) (*http.Response, error) {
 	url := fmt.Sprintf("export/download/file/%v/", pk)
 
 	var response *http.Response
-	request := GetRequestFactory().NewRequest("GET", url)
+	request := sdk.GetRequestFactory().NewRequest("GET", url)
 	file, err := os.Create("temp")
 	if err != nil {
 		return response, err

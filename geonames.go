@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/venicegeo/pzsvc-sdk-go"
 )
 
 // Geoname represents the geoname object that is returned by the geoname
@@ -45,8 +47,9 @@ func Lookup(geom string) (*Geoname, error) {
 	vals := v.Encode()
 	qurl := fmt.Sprintf("api/v1/geoname/?%v", vals)
 
-	request := GetRequestFactory().NewRequest("GET", qurl)
+	request := sdk.GetRequestFactory().NewRequest("GET", qurl)
 
-	eo := DoRequest(request, geoname)
-	return geoname, eo
+	drc := doRequestCallback{unmarshal: geoname}
+	err := sdk.DoRequest(request, drc)
+	return geoname, err
 }

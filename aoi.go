@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/venicegeo/pzsvc-sdk-go"
 )
 
 // Export represents the export object that is returned as part of an AOIItem.
@@ -152,9 +154,9 @@ func ListAOIs(geom string) (*AOIResponse, error) {
 		return nil, &HTTPError{Status: http.StatusNotImplemented, Message: "This method does not currently accept geometries."}
 	}
 	aoiList := new(AOIResponse)
-	request := GetRequestFactory().NewRequest("GET", url)
-
-	err := DoRequest(request, aoiList)
+	request := sdk.GetRequestFactory().NewRequest("GET", url)
+	drc := doRequestCallback{unmarshal: aoiList}
+	err := sdk.DoRequest(request, drc)
 	return aoiList, err
 }
 
@@ -167,9 +169,9 @@ func GetAOI(pk int) (*AOIItem, error) {
 	url := fmt.Sprintf("api/v1/aoi/%v/", pk)
 
 	aoiDetail := new(AOIItem)
-	request := GetRequestFactory().NewRequest("GET", url)
-
-	err := DoRequest(request, aoiDetail)
+	request := sdk.GetRequestFactory().NewRequest("GET", url)
+	drc := doRequestCallback{unmarshal: aoiDetail}
+	err := sdk.DoRequest(request, drc)
 	return aoiDetail, err
 }
 
@@ -194,12 +196,11 @@ func AddAOI(name, geom string, subscribe bool) (*AddAOIResponse, error) {
 		v.Add("subscribe", "True")
 	}
 	vals := v.Encode()
-	qurl := fmt.Sprintf("api/v1/aoi/add/?%v", vals)
+	url := fmt.Sprintf("api/v1/aoi/add/?%v", vals)
 
-	request := GetRequestFactory().NewRequest("GET", qurl)
-
-	err := DoRequest(request, addAOIResponse)
-
+	request := sdk.GetRequestFactory().NewRequest("GET", url)
+	drc := doRequestCallback{unmarshal: addAOIResponse}
+	err := sdk.DoRequest(request, drc)
 	return addAOIResponse, err
 }
 
@@ -250,8 +251,8 @@ func GeneratePointCloudExport(pk int, collects []string, options *GeneratePointC
 	}
 	vals := v.Encode()
 	url := fmt.Sprintf("api/v1/aoi/%v/generate/pointcloud/?%v", pk, vals)
-	request := GetRequestFactory().NewRequest("GET", url)
-
-	err := DoRequest(request, geo)
+	request := sdk.GetRequestFactory().NewRequest("GET", url)
+	drc := doRequestCallback{unmarshal: geo}
+	err := sdk.DoRequest(request, drc)
 	return geo, err
 }

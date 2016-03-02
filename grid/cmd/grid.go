@@ -16,11 +16,7 @@ package cmd
 
 import (
 	"bufio"
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
 	"os"
 	"strings"
 	"syscall"
@@ -52,40 +48,6 @@ var versionCmd = &cobra.Command{
 	},
 }
 
-var config *Config
-
-type basicAuthDecorator struct {
-}
-
-func (bad basicAuthDecorator) Decorate(request *http.Request) error {
-	config := getConfig()
-	request.Header.Set("Authorization", "Basic "+config.Auth)
-	return nil
-}
-
-type configSourceDecorator struct {
-}
-
-func (csd configSourceDecorator) Decorate(request *http.Request) error {
-	config := getConfig()
-	query := request.URL.Query()
-	query.Add("source", config.Key)
-	request.URL.RawQuery = query.Encode()
-	return nil
-}
-
-type logDecorator struct {
-}
-
-func (ld logDecorator) Decorate(request *http.Request) error {
-	var buffer bytes.Buffer
-	writer := bufio.NewWriter(&buffer)
-	request.Write(writer)
-	writer.Flush()
-	log.Printf(buffer.String())
-	return nil
-}
-
 // Execute adds all child commands to the root command GridCmd and sets flags
 // appropriately.
 func Execute() {
@@ -110,11 +72,11 @@ const (
 )
 
 func setup() {
-	rf := grid.GetRequestFactory()
-	rf.BaseURL = defaultBaseURL
-	rf.AddDecorator(new(basicAuthDecorator))
-	rf.AddDecorator(new(configSourceDecorator))
-	// rf.AddDecorator(new(logDecorator))
+	rf := sdk.GetRequestFactory()
+	rf.AddDecorator(&sdk.StaticBaseURLDecorator{BaseURL: defaultBaseURL})
+	rf.AddDecorator(&sdk.ConfigBasicAuthDecorator{Project: "grid"})
+	rf.AddDecorator(&grid.ConfigSourceDecorator{Project: "grid"})
+	// rf.AddDecorator(new(sdk.LogDecorator))
 }
 func init() {
 	gridCmdV = GridCmd
@@ -134,23 +96,4 @@ func logon() (username, password, key string) {
 	key, _ = r.ReadString('\n')
 	key = strings.TrimSpace(key)
 	return
-}
-
-// Config represents the config JSON structure.
-type Config struct {
-	Auth string `json:"auth"`
-	Key  string `json:"key"`
-}
-
-func getConfig() *Config {
-	if config != nil {
-		return config
-	}
-
-	b, err := sdk.GetConfig("grid")
-	if err != nil {
-		log.Fatal("No authentication. Please run 'grid configure' first.")
-	}
-	json.Unmarshal(b, &config)
-	return config
 }

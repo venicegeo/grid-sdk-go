@@ -40,9 +40,10 @@ Download the file(s) specified by the given primary key(s).`,
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		_, err = grid.DownloadByPk(pk)
+		dc, err := grid.DownloadByPk(pk)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
+		log.Printf("Downloaded %v", dc.FileName)
 	},
 }

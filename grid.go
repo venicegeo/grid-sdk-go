@@ -15,7 +15,6 @@
 package grid
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -24,25 +23,6 @@ import (
 
 	"github.com/venicegeo/pzsvc-sdk-go"
 )
-
-const (
-	defaultBaseURL = "https://gridte.rsgis.erdc.dren.mil/te_ba/"
-)
-
-var client *http.Client
-
-// GetClient returns our one http.Client, instantiating it if needed
-func GetClient() *http.Client {
-	if client == nil {
-		transport := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-
-		client = &http.Client{Transport: transport}
-	}
-
-	return client
-}
 
 // ErrorObject represents any error returnable by the GRiD service v1
 type ErrorObject struct {
@@ -80,10 +60,7 @@ func TaskDetails(pk string) (*TaskObject, error) {
 	taskObject := new(TaskObject)
 	url := fmt.Sprintf("api/v1/task/%v/", pk)
 	request := sdk.GetRequestFactory().NewRequest("GET", url)
-
-	drc := doRequestCallback{unmarshal: taskObject}
-
-	err := sdk.DoRequest(request, drc)
+	err := sdk.DoRequest(request, &doRequestCallback{unmarshal: taskObject})
 	return taskObject, err
 }
 

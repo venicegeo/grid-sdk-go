@@ -155,8 +155,7 @@ func ListAOIs(geom string) (*AOIResponse, error) {
 	}
 	aoiList := new(AOIResponse)
 	request := sdk.GetRequestFactory().NewRequest("GET", url)
-	drc := doRequestCallback{unmarshal: aoiList}
-	err := sdk.DoRequest(request, drc)
+	err := sdk.DoRequest(request, &doRequestCallback{unmarshal: aoiList})
 	return aoiList, err
 }
 
@@ -170,8 +169,7 @@ func GetAOI(pk int) (*AOIItem, error) {
 
 	aoiDetail := new(AOIItem)
 	request := sdk.GetRequestFactory().NewRequest("GET", url)
-	drc := doRequestCallback{unmarshal: aoiDetail}
-	err := sdk.DoRequest(request, drc)
+	err := sdk.DoRequest(request, &doRequestCallback{unmarshal: aoiDetail})
 	return aoiDetail, err
 }
 
@@ -199,8 +197,7 @@ func AddAOI(name, geom string, subscribe bool) (*AddAOIResponse, error) {
 	url := fmt.Sprintf("api/v1/aoi/add/?%v", vals)
 
 	request := sdk.GetRequestFactory().NewRequest("GET", url)
-	drc := doRequestCallback{unmarshal: addAOIResponse}
-	err := sdk.DoRequest(request, drc)
+	err := sdk.DoRequest(request, &doRequestCallback{unmarshal: addAOIResponse})
 	return addAOIResponse, err
 }
 
@@ -252,7 +249,6 @@ func GeneratePointCloudExport(pk int, collects []string, options *GeneratePointC
 	vals := v.Encode()
 	url := fmt.Sprintf("api/v1/aoi/%v/generate/pointcloud/?%v", pk, vals)
 	request := sdk.GetRequestFactory().NewRequest("GET", url)
-	drc := doRequestCallback{unmarshal: geo}
-	err := sdk.DoRequest(request, drc)
+	err := sdk.DoRequest(request, &doRequestCallback{unmarshal: geo})
 	return geo, err
 }

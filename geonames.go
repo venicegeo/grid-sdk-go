@@ -49,7 +49,6 @@ func Lookup(geom string) (*Geoname, error) {
 
 	request := sdk.GetRequestFactory().NewRequest("GET", qurl)
 
-	drc := doRequestCallback{unmarshal: geoname}
-	err := sdk.DoRequest(request, drc)
+	err := sdk.DoRequest(request, &doRequestCallback{unmarshal: geoname})
 	return geoname, err
 }

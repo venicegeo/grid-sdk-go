@@ -16,11 +16,6 @@ package grid
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
-	"mime"
-	"net/http"
-	"os"
 
 	"github.com/venicegeo/pzsvc-sdk-go"
 )
@@ -70,38 +65,16 @@ func GetExport(pk int) (*ExportDetail, error) {
 
 	exportDetail := new(ExportDetail)
 	request := sdk.GetRequestFactory().NewRequest("GET", url)
-	drc := doRequestCallback{unmarshal: exportDetail}
-
-	err := sdk.DoRequest(request, drc)
-
+	err := sdk.DoRequest(request, &doRequestCallback{unmarshal: exportDetail})
 	return exportDetail, err
 }
 
 // DownloadByPk downloads the file specified by the user-provided primary key.
-func DownloadByPk(pk int) (*http.Response, error) {
+func DownloadByPk(pk int) (*sdk.DownloadCallback, error) {
 	url := fmt.Sprintf("export/download/file/%v/", pk)
 
-	var response *http.Response
 	request := sdk.GetRequestFactory().NewRequest("GET", url)
-	file, err := os.Create("temp")
-	if err != nil {
-		return response, err
-	}
-	defer file.Close()
-
-	response, err = GetClient().Do(request)
-	if err != nil {
-		return response, &HTTPError{Message: err.Error(), Status: http.StatusInternalServerError}
-	}
-	cd := response.Header.Get("Content-Disposition")
-	_, params, err := mime.ParseMediaType(cd)
-	if err != nil {
-		// This generally means a broader error which is hopefully contained in the body
-		defer response.Body.Close()
-		body, _ := ioutil.ReadAll(response.Body)
-		return response, &HTTPError{Message: string(body), Status: http.StatusNotAcceptable}
-	}
-	err = os.Rename(file.Name(), params["filename"])
-	log.Printf("Downloaded %v", params["filename"])
-	return response, err
+	dc := sdk.DownloadCallback{}
+	err := sdk.DoRequest(request, &dc)
+	return &dc, err
 }

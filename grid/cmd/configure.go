@@ -15,12 +15,18 @@
 package cmd
 
 import (
+	"bufio"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
+	"syscall"
+
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/spf13/cobra"
 	"github.com/venicegeo/grid-sdk-go"
@@ -67,4 +73,20 @@ is encoded in the user's config.json file`,
 		config := grid.Config{Auth: auth, Key: key}
 		json.NewEncoder(file).Encode(config)
 	},
+}
+
+func logon() (username, password, key string) {
+	r := bufio.NewReader(os.Stdin)
+	fmt.Print("GRiD Username: ")
+	username, _ = r.ReadString('\n')
+	username = strings.TrimSpace(username)
+
+	fmt.Print("GRiD Password: ")
+	bytePassword, _ := terminal.ReadPassword(int(syscall.Stdin))
+	password = string(bytePassword)
+
+	fmt.Print("\nGRiD API Key: ")
+	key, _ = r.ReadString('\n')
+	key = strings.TrimSpace(key)
+	return
 }

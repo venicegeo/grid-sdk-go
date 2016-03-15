@@ -15,13 +15,7 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strings"
-	"syscall"
-
-	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/spf13/cobra"
 	"github.com/venicegeo/grid-sdk-go"
@@ -36,7 +30,6 @@ var GridCmd = &cobra.Command{
 grid is a command-line interface to the GRiD database.`,
 }
 
-var pk int
 var gridCmdV *cobra.Command
 
 var versionCmd = &cobra.Command{
@@ -51,12 +44,6 @@ var versionCmd = &cobra.Command{
 // Execute adds all child commands to the root command GridCmd and sets flags
 // appropriately.
 func Execute() {
-	addCommands()
-	setup()
-	GridCmd.Execute()
-}
-
-func addCommands() {
 	GridCmd.AddCommand(addCmd)
 	GridCmd.AddCommand(configureCmd)
 	GridCmd.AddCommand(exportCmd)
@@ -65,35 +52,22 @@ func addCommands() {
 	GridCmd.AddCommand(pullCmd)
 	GridCmd.AddCommand(taskCmd)
 	GridCmd.AddCommand(versionCmd)
+
+	// The request factory manages requests to the services.
+	// The decorators add things to the service that need
+	rf := sdk.GetRequestFactory()
+	rf.AddDecorator(&sdk.StaticBaseURLDecorator{BaseURL: defaultBaseURL})
+	rf.AddDecorator(&sdk.ConfigBasicAuthDecorator{Project: "grid"})
+	rf.AddDecorator(&grid.ConfigSourceDecorator{Project: "grid"})
+	// rf.AddDecorator(new(sdk.LogDecorator))
+
+	GridCmd.Execute()
 }
 
 const (
 	defaultBaseURL = "https://gridte.rsgis.erdc.dren.mil/te_ba/"
 )
 
-func setup() {
-	rf := sdk.GetRequestFactory()
-	rf.AddDecorator(&sdk.StaticBaseURLDecorator{BaseURL: defaultBaseURL})
-	rf.AddDecorator(&sdk.ConfigBasicAuthDecorator{Project: "grid"})
-	rf.AddDecorator(&grid.ConfigSourceDecorator{Project: "grid"})
-	// rf.AddDecorator(new(sdk.LogDecorator))
-}
 func init() {
 	gridCmdV = GridCmd
-}
-
-func logon() (username, password, key string) {
-	r := bufio.NewReader(os.Stdin)
-	fmt.Print("GRiD Username: ")
-	username, _ = r.ReadString('\n')
-	username = strings.TrimSpace(username)
-
-	fmt.Print("GRiD Password: ")
-	bytePassword, _ := terminal.ReadPassword(int(syscall.Stdin))
-	password = string(bytePassword)
-
-	fmt.Print("\nGRiD API Key: ")
-	key, _ = r.ReadString('\n')
-	key = strings.TrimSpace(key)
-	return
 }

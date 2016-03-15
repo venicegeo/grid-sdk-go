@@ -70,7 +70,6 @@ type doRequestCallback struct {
 
 func (drc doRequestCallback) Callback(response *http.Response, err error) error {
 	if err != nil {
-		// log.Printf("DoRequest failed to Do the request")
 		return &HTTPError{Message: err.Error(), Status: http.StatusInternalServerError}
 	}
 
@@ -91,11 +90,8 @@ func (drc doRequestCallback) Callback(response *http.Response, err error) error 
 		log.Printf("Unmarshal error in ErrorCheck: %v", string(body))
 		return &HTTPError{Message: err.Error(), Status: http.StatusNotAcceptable}
 	} else if eo.Error != "" {
-		// log.Printf("ErrorCheck discovered %v", eo.Error)
 		return &HTTPError{Message: eo.Error, Status: http.StatusBadRequest}
 	}
-
-	// log.Printf("Body: %v", string(body))
 
 	// If we've gotten this far, hopefully we can unmarshal properly
 	err = json.Unmarshal(body, drc.unmarshal)
@@ -104,7 +100,6 @@ func (drc doRequestCallback) Callback(response *http.Response, err error) error 
 		return &HTTPError{Message: err.Error(), Status: http.StatusNotAcceptable}
 	}
 	return nil
-
 }
 
 // Config represents the config JSON structure.

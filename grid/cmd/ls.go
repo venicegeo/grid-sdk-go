@@ -42,7 +42,6 @@ AOIs.`,
 
 		// If the user has provided one or more arguments, assume they are primary
 		// keys and concurrently query the AOI and export API endpoints for details.
-		var results []interface{}
 		for _, arg := range args {
 			pk, err := strconv.Atoi(arg)
 			if err != nil {
@@ -50,41 +49,18 @@ AOIs.`,
 				continue
 			}
 
-			c := make(chan interface{})
-			go func() {
-				exports, err := grid.GetAOI(pk)
-				if err == nil {
-					c <- exports
-				} else {
-					c <- err
-				}
-			}()
-			go func() {
-				exportFiles, err := grid.GetExport(pk)
-				if err == nil {
-					c <- exportFiles
-				} else {
-					c <- err
-				}
-			}()
-
-			for i := 0; i < 2; i++ {
-				result := <-c
-				results = append(results, result)
+			exports, expErr := grid.GetAOI(pk)
+			if expErr == nil {
+				printExport(exports)
+			} else {
+				// log.Print(expErr.Error())
 			}
-		}
 
-		// Depending on the type of the returned objects, print it accordingly.
-		for _, v := range results {
-			switch u := v.(type) {
-			case *grid.AOIItem:
-				printExport(u)
-			case *grid.ExportDetail:
-				printExportFile(u)
-			case error:
-				// log.Print(u.Error())
-			default:
-				//NOOP fmt.Println("unknown")
+			exportFiles, exfErr := grid.GetExport(pk)
+			if exfErr == nil {
+				printExportFile(exportFiles)
+			} else {
+				// log.Print(exfErr.Error())
 			}
 		}
 	},
@@ -96,7 +72,6 @@ func getAOIs() interface{} {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
 	return a
 }
 

@@ -59,7 +59,7 @@ func Execute() {
 	rf.AddDecorator(&sdk.StaticBaseURLDecorator{BaseURL: defaultBaseURL})
 	rf.AddDecorator(&sdk.ConfigBasicAuthDecorator{Project: "grid"})
 	rf.AddDecorator(&grid.ConfigSourceDecorator{Project: "grid"})
-	// rf.AddDecorator(new(sdk.LogDecorator))
+	rf.AddDecorator(new(sdk.LogDecorator))
 
 	GridCmd.Execute()
 }

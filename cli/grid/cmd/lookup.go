@@ -15,31 +15,32 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/spf13/cobra"
-	"github.com/venicegeo/grid-sdk-go"
 )
 
-var pullCmd = &cobra.Command{
-	Use:   "pull",
-	Short: "Download File",
+var lookupCmd = &cobra.Command{
+	Use:   "lookup [WKT geometry]...",
+	Short: "Get suggested AOI name",
 	Long: `
-Download the file(s) specified by the given primary key(s).`,
+Lookup is used to retrieve a suggested AOI name from GRiD's Geonames endpoint
+for each of the provided WKT geometries.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// setup the GRiD client
-		tp := GetTransport()
-		client := grid.NewClient(tp.Client())
+		if len(args) == 0 {
+			fmt.Println("Please provide a WKT geometry")
+			cmd.Usage()
+			return
+		}
 
-		// TODO(chambbj): allow for multiple pks/downloads
-		_, err := client.Export.DownloadByPk(pk)
-		if err != nil {
-			log.Fatal(err.Error())
+		for _, geom := range args {
+			// get and print the suggested name for the current geometry
+			a, _, err := g.Lookup(geom)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(a.Name)
 		}
 	},
-}
-
-// TODO(chambbj): pass pk(s) as argument(s), as with the other commands
-func init() {
-	pullCmd.Flags().IntVarP(&pk, "pk", "", 0, "Primary key")
 }

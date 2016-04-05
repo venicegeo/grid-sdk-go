@@ -111,7 +111,7 @@ var g *grid.Grid
 
 func init() {
 	config := getConfig()
-	g = grid.NewClient(config.Auth, config.Key)
+	g = grid.NewClient(config.Auth, config.Key, "")
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {

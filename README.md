@@ -32,6 +32,7 @@ updated at any time by running `grid configure`.
     GRiD Username: johnsmith
     GRiD Password:
     GRiD API Key: MyAPI-key
+    GRiD Base URL: https://rsgis.erdc.dren.mil/te_ba/
 
 This will create (or update) the configuration file in `$HOME/.grid/credentials`
 on Linux/Mac OS X, or `%HOMEPATH%/.grid/credentials` on Windows. This
@@ -154,9 +155,10 @@ func main() {
   // and the user's password.
   auth := base64.StdEncoding.EncodeToString([]byte("johnsmith:password"))
 
-  // A GRiD client is created by providing the authorization string and API key,
-  // both as strings.
-  g := grid.NewClient(auth, "MyAPI-key")
+  // A GRiD client is created by providing the authorization string, API key,
+  // and base URL as strings. If the base URL is empty, the default Test &
+  // Evaluation instance of GRiD will be targeted.
+  g := grid.NewClient(auth, "MyAPI-key", "")
 
   // Get details of the AOI with primary key of 100. The GRiD client does not
   // panic or set any HTTP status codes on error. Errors are returned from each

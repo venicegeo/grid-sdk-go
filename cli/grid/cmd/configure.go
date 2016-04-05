@@ -32,6 +32,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Config represents the config JSON structure.
+type Config struct {
+	Auth string `json:"auth"`
+	Key  string `json:"key"`
+	URL  string `json:"url"`
+}
+
+/*
+logon is called whenever all fields of the config file need to be updated, or
+or upon config file creation.
+*/
 func logon() {
 	// prompt user for username and password and base64 encode it
 	r := bufio.NewReader(os.Stdin)
@@ -42,29 +53,17 @@ func logon() {
 	fmt.Print("GRiD Password: ")
 	bytePassword, _ := terminal.ReadPassword(int(syscall.Stdin))
 	password := string(bytePassword)
+	fmt.Println()
 
-	fmt.Print("\nGRiD API Key: ")
+	fmt.Print("GRiD API Key: ")
 	key, _ := r.ReadString('\n')
 	key = strings.TrimSpace(key)
 
-	// get the appropriate path for the config.json, depends on platform
-	var path string
-	if runtime.GOOS == "windows" {
-		path = os.Getenv("HOMEPATH")
-	} else {
-		path = os.Getenv("HOME")
-	}
-	path = path + string(filepath.Separator) + ".grid"
+	fmt.Print("GRiD Base URL: ")
+	baseURL, _ := r.ReadString('\n')
+	baseURL = strings.TrimSpace(baseURL)
 
-	// TODO(chambbj): I think this does throw an error on Windows. Need to
-	// better understand platform-specific behavior.
-	err := os.Mkdir(path, 0777)
-	// if err != nil {
-	// log.Fatal(err)
-	// }
-
-	fileandpath := path + string(filepath.Separator) + "config.json"
-	file, err := os.Create(fileandpath)
+	file, err := createConfigFile()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -73,25 +72,13 @@ func logon() {
 	auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
 
 	// encode the configuration details as JSON
-	config := Config{Auth: auth, Key: key}
+	config := Config{Auth: auth, Key: key, URL: baseURL}
 	json.NewEncoder(file).Encode(config)
 }
 
-// Config represents the config JSON structure.
-type Config struct {
-	Auth string `json:"auth"`
-	Key  string `json:"key"`
-}
-
-// getConfig extracts the authoriztion string and API key from the config file.
+// getConfig extracts config file contents.
 func getConfig() Config {
-	var path string
-	if runtime.GOOS == "windows" {
-		path = os.Getenv("HOMEPATH")
-	} else {
-		path = os.Getenv("HOME")
-	}
-	path = path + string(filepath.Separator) + ".grid"
+	path := getConfigFilePath()
 	fileandpath := path + string(filepath.Separator) + "config.json"
 	file, err := os.Open(fileandpath)
 	if err != nil {
@@ -104,8 +91,72 @@ func getConfig() Config {
 	return config
 }
 
+// getConfigFilePath returns the full path to the config file.
+func getConfigFilePath() string {
+	// get the appropriate path for the config.json, depends on platform
+	var path string
+	if runtime.GOOS == "windows" {
+		path = os.Getenv("HOMEPATH")
+	} else {
+		path = os.Getenv("HOME")
+	}
+	path = path + string(filepath.Separator) + ".grid"
+	return path
+}
+
+// createConfigFile creates the config file for writing, overwriting existing.
+func createConfigFile() (*os.File, error) {
+	path := getConfigFilePath()
+
+	// TODO(chambbj): I think this does throw an error on Windows. Need to
+	// better understand platform-specific behavior.
+	err := os.Mkdir(path, 0777)
+	// if err != nil {
+	// log.Fatal(err)
+	// }
+
+	fileandpath := path + string(filepath.Separator) + "config.json"
+	file, err := os.Create(fileandpath)
+	return file, err
+}
+
+// updateBaseURL rewrites the config file, updating only the base URL.
+func updateBaseURL(baseURL string) {
+	currentConfig := getConfig()
+	file, err := createConfigFile()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	// encode the configuration details as JSON
+	config := Config{Auth: currentConfig.Auth, Key: currentConfig.Key, URL: baseURL}
+	json.NewEncoder(file).Encode(config)
+}
+
+// updateBaseURL rewrites the config file, updating only the base URL.
+func updateAPIKey(key string) {
+	currentConfig := getConfig()
+	file, err := createConfigFile()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	// encode the configuration details as JSON
+	config := Config{Auth: currentConfig.Auth, Key: key, URL: currentConfig.URL}
+	json.NewEncoder(file).Encode(config)
+}
+
+var baseURL, key string
+
+func init() {
+	configureCmd.Flags().StringVarP(&baseURL, "base_url", "b", "", "GRiD Base URL")
+	configureCmd.Flags().StringVarP(&key, "key", "k", "", "GRiD API Key")
+}
+
 var configureCmd = &cobra.Command{
-	Use:   "configure",
+	Use:   "configure [-b base_url][-k key]",
 	Short: "Configure the CLI",
 	Long: `
 Configure the GRiD CLI with the user's GRiD credentials.
@@ -113,6 +164,12 @@ Configure the GRiD CLI with the user's GRiD credentials.
 This function will prompt the user for their GRiD username and password, which
 is encoded in the user's config.json file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logon()
+		if baseURL != "" {
+			updateBaseURL(baseURL)
+		} else if key != "" {
+			updateAPIKey(key)
+		} else {
+			logon()
+		}
 	},
 }

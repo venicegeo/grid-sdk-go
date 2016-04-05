@@ -58,5 +58,5 @@ func Execute() {
 func init() {
 	// setup the GRiD client
 	config := getConfig()
-	g = grid.NewClient(config.Auth, config.Key)
+	g = grid.NewClient(config.Auth, config.Key, config.URL)
 }

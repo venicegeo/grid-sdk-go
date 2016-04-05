@@ -342,12 +342,15 @@ func sanitizeURL(uri *url.URL) *url.URL {
 }
 
 // NewClient returns a new GRiD API client.
-func NewClient(auth, key string) *Grid {
-	baseURL, _ := url.Parse(defaultBaseURL)
+func NewClient(auth, key, baseURL string) *Grid {
+	if baseURL == "" {
+		baseURL = defaultBaseURL
+	}
+	parsedBaseURL, _ := url.Parse(baseURL)
 	return &Grid{
 		Auth:    auth,
 		Key:     key,
-		BaseURL: baseURL,
+		BaseURL: parsedBaseURL,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},

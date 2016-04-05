@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/venicegeo/grid-sdk-go"
@@ -52,11 +53,29 @@ func Execute() {
 	GridCmd.AddCommand(taskCmd)
 	GridCmd.AddCommand(versionCmd)
 
-	GridCmd.Execute()
+	if err := GridCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
+	}
 }
 
 func init() {
-	// setup the GRiD client
-	config := getConfig()
-	g = grid.NewClient(config.Auth, config.Key, config.URL)
+	// Try once. We'll assume that on first run, we will get an error, which
+	// requires that we login.
+	var err error
+	g, err = grid.New()
+	if err != nil {
+		fmt.Println("It looks like this is your first time running the GRiD CLI. Please follow the prompts to configure the CLI with your credentials.")
+		err := logon()
+		if err != nil {
+			panic("Error creating credentials file!")
+		}
+
+		// After that, things should work fine. If we've got a problem now, then
+		// panic!
+		g, err = grid.New()
+		if err != nil {
+			panic(err)
+		}
+	}
 }

@@ -15,103 +15,27 @@
 package main
 
 import (
-	"bufio"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
-	"syscall"
-
-	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/gorilla/mux"
 	"github.com/venicegeo/grid-sdk-go"
 )
 
-// GetConfig extracts the authoriztion string and API key from the config file.
-func getConfig() Config {
-	var path string
-	if runtime.GOOS == "windows" {
-		path = os.Getenv("HOMEPATH")
-	} else {
-		path = os.Getenv("HOME")
-	}
-	path = path + string(filepath.Separator) + ".grid"
-	fileandpath := path + string(filepath.Separator) + "config.json"
-	file, err := os.Open(fileandpath)
-	if err != nil {
-		logon()
-		// fmt.Println("No authentication. Please run 'grid configure' first.")
-	}
-	var config Config
-	b, err := ioutil.ReadAll(file)
-	json.Unmarshal(b, &config)
-	return config
-}
-
-func logon() {
-	// prompt user for username and password and base64 encode it
-	r := bufio.NewReader(os.Stdin)
-	fmt.Print("GRiD Username: ")
-	username, _ := r.ReadString('\n')
-	username = strings.TrimSpace(username)
-
-	fmt.Print("GRiD Password: ")
-	bytePassword, _ := terminal.ReadPassword(int(syscall.Stdin))
-	password := string(bytePassword)
-
-	fmt.Print("\nGRiD API Key: ")
-	key, _ := r.ReadString('\n')
-	key = strings.TrimSpace(key)
-
-	// get the appropriate path for the config.json, depends on platform
-	var path string
-	if runtime.GOOS == "windows" {
-		path = os.Getenv("HOMEPATH")
-	} else {
-		path = os.Getenv("HOME")
-	}
-	path = path + string(filepath.Separator) + ".grid"
-
-	// TODO(chambbj): I think this does throw an error on Windows. Need to
-	// better understand platform-specific behavior.
-	err := os.Mkdir(path, 0777)
-	// if err != nil {
-	// log.Fatal(err)
-	// }
-
-	fileandpath := path + string(filepath.Separator) + "config.json"
-	file, err := os.Create(fileandpath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-
-	// encode the configuration details as JSON
-	config := Config{Auth: auth, Key: key}
-	json.NewEncoder(file).Encode(config)
-}
-
-// Config represents the config JSON structure.
-type Config struct {
-	Auth string `json:"auth"`
-	Key  string `json:"key"`
-}
-
 var g *grid.Grid
 
 func init() {
-	config := getConfig()
-	g = grid.NewClient(config.Auth, config.Key, "")
+	var err error
+	g, err = grid.New()
+	if err != nil {
+		log.Printf("Problem creating GRiD client. Do you have a valid credentials file?")
+		log.Fatal(err)
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {

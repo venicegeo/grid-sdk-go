@@ -27,7 +27,6 @@ import (
 
 var geom string
 
-// TODO(chambbj): pass pk(s) as argument(s), as with the other commands
 func init() {
 	lsCmd.Flags().StringVarP(&geom, "geom", "", "", "WKT Polygon")
 }

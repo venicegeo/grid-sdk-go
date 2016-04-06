@@ -36,6 +36,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
+	"runtime"
 )
 
 const (
@@ -296,6 +298,13 @@ type TaskObject struct {
 	TaskID    string `json:"task_id,omitempty"`
 }
 
+// Config represents the config JSON structure.
+type Config struct {
+	Auth string `json:"auth"`
+	Key  string `json:"key"`
+	URL  string `json:"url"`
+}
+
 /*
 CheckResponse checks the API response for errors, and returns them if present.
 A response is considered an error if it has a status code outside the 200 range.
@@ -341,20 +350,24 @@ func sanitizeURL(uri *url.URL) *url.URL {
 	return uri
 }
 
-// NewClient returns a new GRiD API client.
-func NewClient(auth, key, baseURL string) *Grid {
-	if baseURL == "" {
-		baseURL = defaultBaseURL
+// New returns a new GRiD API client.
+func New() (*Grid, error) {
+	config, err := GetConfig()
+	if err != nil {
+		return nil, err
 	}
-	parsedBaseURL, _ := url.Parse(baseURL)
+	if config.URL == "" {
+		config.URL = defaultBaseURL
+	}
+	parsedBaseURL, _ := url.Parse(config.URL)
 	return &Grid{
-		Auth:    auth,
-		Key:     key,
+		Auth:    config.Auth,
+		Key:     config.Key,
 		BaseURL: parsedBaseURL,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
-	}
+	}, nil
 }
 
 /*
@@ -654,4 +667,44 @@ func (g *Grid) TaskDetails(pk string) (*TaskObject, *Response, error) {
 	req, err := g.NewRequest("GET", url, nil)
 	resp, err := g.Do(req, taskObject)
 	return taskObject, resp, err
+}
+
+// GetConfig extracts config file contents.
+func GetConfig() (Config, error) {
+	var config Config
+	path := getConfigFilePath()
+	file, err := os.Open(path)
+	if err != nil {
+		return config, err
+	}
+	b, err := ioutil.ReadAll(file)
+	json.Unmarshal(b, &config)
+	return config, nil
+}
+
+// getConfigFilePath returns the full path to the config file.
+// https://github.com/starkandwayne/cf-cli/blob/master/cf/configuration/config_helpers.go#L9-L20
+func getConfigFilePath() string {
+	configDir := filepath.Join(userHomeDir(), ".grid")
+
+	err := os.MkdirAll(configDir, 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	return filepath.Join(configDir, "config.json")
+}
+
+func userHomeDir() string {
+	if runtime.GOOS == "windows" {
+		return os.Getenv("USERPROFILE")
+	}
+	return os.Getenv("HOME")
+}
+
+// CreateConfigFile creates the config file for writing, overwriting existing.
+func CreateConfigFile() (*os.File, error) {
+	path := getConfigFilePath()
+	file, err := os.Create(path)
+	return file, err
 }

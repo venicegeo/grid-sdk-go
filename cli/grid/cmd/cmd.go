@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -59,23 +60,15 @@ func Execute() {
 	}
 }
 
-func init() {
-	// Try once. We'll assume that on first run, we will get an error, which
-	// requires that we login.
+// initClient is called by each subcommand except configure. The reason is
+// simple. Configure can proceed without a valid client, and in fact is a
+// prerequisite to any other API call. If this weren't the case, it would be an
+// init() function.
+func initClient() error {
 	var err error
 	g, err = grid.New()
 	if err != nil {
-		fmt.Println("It looks like this is your first time running the GRiD CLI. Please follow the prompts to configure the CLI with your credentials.")
-		err := logon()
-		if err != nil {
-			panic("Error creating credentials file!")
-		}
-
-		// After that, things should work fine. If we've got a problem now, then
-		// panic!
-		g, err = grid.New()
-		if err != nil {
-			panic(err)
-		}
+		return errors.New("It looks like this is your first time running the GRiD CLI.\nPlease run 'grid configure' to continue.")
 	}
+	return nil
 }

@@ -28,6 +28,12 @@ var lookupCmd = &cobra.Command{
 Lookup is used to retrieve a suggested AOI name from GRiD's Geonames endpoint
 for each of the provided WKT geometries.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		err := initClient()
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
 		if len(args) == 0 {
 			fmt.Println("Please provide a WKT geometry")
 			cmd.Usage()

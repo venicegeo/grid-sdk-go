@@ -33,6 +33,12 @@ more WKT geometries.
 This function queries GRiD's Geonames endpoint with the provided geometries and
 automatically uses the returned values as the AOI names.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		err := initClient()
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
 		if len(args) == 0 {
 			fmt.Println("Please provide a WKT geometry")
 			cmd.Usage()

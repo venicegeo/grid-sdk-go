@@ -40,6 +40,12 @@ List AOI, export, or file details for the provided primary keys.
 With no keys specified, the command returns a listing of all of the user's
 AOIs.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		err := initClient()
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
 		listAOIs := false
 		if len(args) == 0 || geom != "" {
 			listAOIs = true

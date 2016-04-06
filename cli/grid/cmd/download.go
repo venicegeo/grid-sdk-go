@@ -28,6 +28,12 @@ var pullCmd = &cobra.Command{
 	Long: `
 Download the file(s) specified by the given primary key(s).`,
 	Run: func(cmd *cobra.Command, args []string) {
+		err := initClient()
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
 		for _, arg := range args {
 			pk, err := strconv.Atoi(arg)
 			if err != nil {

@@ -30,6 +30,12 @@ var exportCmd = &cobra.Command{
 	Long: `
 Export is used to initiate a GRiD export for the AOI and for each of the provided collects.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		err := initClient()
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
 		var collects []string
 		switch len(args) {
 		case 0:

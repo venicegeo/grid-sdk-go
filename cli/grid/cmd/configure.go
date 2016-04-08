@@ -21,12 +21,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"runtime"
 	"strings"
-	"syscall"
 
-	"golang.org/x/crypto/ssh/terminal"
-
+	"github.com/howeyc/gopass"
 	"github.com/spf13/cobra"
 	"github.com/venicegeo/grid-sdk-go"
 )
@@ -45,25 +42,9 @@ func readLine(prompt string) (input string, err error) {
 func readPassword(prompt string) (passwd string, err error) {
 	fmt.Print(prompt)
 
-	password, err := terminal.ReadPassword(int(syscall.Stdin))
+	password, err := gopass.GetPasswd()
 	if err != nil {
 		return "", err
-	}
-	fmt.Print("\n")
-
-	/*
-		This hack appears to be necessary on Windows to be able to continue reading
-		strings from stdin after reading the password.
-
-		The same (or similar) behavior is reported when using gopass:
-		https://github.com/howeyc/gopass/issues/28
-	*/
-	if runtime.GOOS == "windows" {
-		reader := bufio.NewReader(os.Stdin)
-		_, err = reader.ReadString('\n')
-		if err != nil {
-			fmt.Println(err.Error())
-		}
 	}
 
 	return strings.TrimSpace(string(password)), nil

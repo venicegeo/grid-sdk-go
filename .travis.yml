@@ -9,7 +9,7 @@ notifications:
   slack:
     secure: nRuihdFcdKKcT29Hqdw5xVQRicedNntuGC4WXo+JOoPduaEL6G0UOlktbYXurnTkCVW74epYl2PNGELKkQ5zAPS/XhKSqsYfxzQ0oBvtUvJjmln0pyLjvvdwaiOtmz6I3z05BME1B3ZWGKyGkNAYr7X/9fMeMb8hwx+IIqu9v3q500PMFvcfqZaiw3LhSTNtCgo2IEMsED4IdFcH1lbRFM3jU9GaZVB8Ao4M78rrYrgsZB9ZBknOUxXdTazN7xGKHiiIR73vHX2sCVwmeWm1MRLB/j6SgB13uq1InnLMOqMJjxQGb1qEhk/4zGh914GwS4QkSNV7majF9hMB0zUBXpLgIsW26Uz0GlcJCqzpVlPYb88pbAY2a0XlNWY2h8mMRFT1QsICa7PXiYrADAoa/MATaYfDdt0aCoYk51EnLotIC5p9cqix86AgAo9c0QYgHNJp6nL4Z6KC6ll9iFEK1jjiOgP1eNrghdfm4KtcsCbMZuBe5CLuGtD3592jBollhyYgkwBAushpzSGIP65/FwB7KOqtYWwySXsNOQG9e3VsQSFsEU0J8sQO7HYwAStMdWmFiurTX4TkYKIW/jArViulvjefkgDm4EqPJpnAvHzcI8tCoCiLgYfLvY9ZFEH4AfkEVj+nDzcIWp1j2UOFqQ9b6UhVQ8ghz9GtXaOa3+g=
 script:
-- gox -osarch="darwin/amd64 windows/amd64 linux/amd64" ./cli/grid -o "dist/{{.Dir}}-{{.OS}}-{{.Arch}}"
+- gox -osarch="darwin/amd64 windows/amd64 linux/amd64" -output "dist/{{.Dir}}-{{.OS}}-{{.Arch}}" ./cli/grid
 deploy:
   provider: releases
   api_key:

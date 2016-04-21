@@ -3,6 +3,7 @@ go:
 - 1.4
 before_install:
   - go get github.com/mitchellh/gox
+  - go get github.com/inconshreveable/mousetrap
 before_script:
   - gox -osarch="darwin/amd64 windows/amd64 linux/amd64" -build-toolchain
 notifications:

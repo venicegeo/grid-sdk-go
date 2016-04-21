@@ -11,6 +11,20 @@
 
 ## Installing
 
+To install just the CLI, simply download the latest binary for your platform. For example,
+
+```console
+$ curl -L https://github.com/venicegeo/grid-sdk-go/releases/download/v0.2.3/grid-darwin-amd64 \
+> /usr/local/bin/grid
+$ chmod +x /usr/local/bin/grid
+```
+
+* [OS X](https://github.com/venicegeo/grid-sdk-go/releases/download/v0.2.3/grid-darwin-amd64)
+* [Linux](https://github.com/venicegeo/grid-sdk-go/releases/download/v0.2.3/grid-linux-amd64)
+* [Windows](https://github.com/venicegeo/grid-sdk-go/releases/download/v0.2.3/grid-windows-amd64.exe)
+
+On Linux and OS X, you'll need to run `chmod +x grid` to make the binary executable.
+
 Use `go get` to install the latest version of both the CLI and the library.
 
     $ go get -v github.com/venicegeo/grid-sdk-go/...

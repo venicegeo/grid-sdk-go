@@ -38,7 +38,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of the GRiD CLI",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("grid v0.1 -- HEAD")
+		fmt.Println("grid v0.2.3 -- HEAD")
 	},
 }
 

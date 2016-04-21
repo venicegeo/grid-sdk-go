@@ -505,7 +505,7 @@ func (g *Grid) GetAOI(pk int) (*AOIItem, *Response, error) {
 	}
 
 	aoiDetail := new(AOIItem)
-	resp, err := g.Do(req, aoiDetail)
+	resp, _ := g.Do(req, aoiDetail)
 
 	return aoiDetail, resp, nil
 }
@@ -677,7 +677,7 @@ func GetConfig() (Config, error) {
 	if err != nil {
 		return config, err
 	}
-	b, err := ioutil.ReadAll(file)
+	b, _ := ioutil.ReadAll(file)
 	json.Unmarshal(b, &config)
 	return config, nil
 }

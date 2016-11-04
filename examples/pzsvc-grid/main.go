@@ -130,10 +130,10 @@ func generatePointCloudHandler(writer http.ResponseWriter, request *http.Request
 	aoiStr := request.FormValue("aoi")
 	aoi, err := strconv.Atoi(aoiStr)
 	if err == nil {
-		collectsStr := request.FormValue("collects")
-		collects := strings.Split(collectsStr, "+")
+		productsStr := request.FormValue("products")
+		products := strings.Split(productsStr, "+")
 		options := grid.NewGeneratePointCloudExportOptions()
-		generateObject, _, err := g.GeneratePointCloudExport(aoi, collects, options)
+		generateObject, _, err := g.GeneratePointCloudExport(aoi, products, options)
 		if err == nil {
 			bytes, err := json.Marshal(generateObject)
 			if err == nil {

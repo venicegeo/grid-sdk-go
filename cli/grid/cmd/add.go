@@ -58,28 +58,18 @@ automatically uses the returned values as the AOI names.`,
 				log.Fatal(err)
 			}
 
-			// all this to simply parse the result and print the pk of the new AOI
-			success := (*b)["success"].(bool)
-			if success {
-				delete((*b), "success")
-
-				d, err := json.Marshal(b)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				c := new(grid.AOIResponse)
-				err = json.Unmarshal(d, &c)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				for _, v := range *c {
-					for _, v := range v.AOIs {
-						fmt.Printf("Successfully created AOI \"%v\" with primary key \"%v\" at %v\n", v.Fields.Name, v.Pk, v.Fields.CreatedAt)
-					}
-				}
+			d, err := json.Marshal(b)
+			if err != nil {
+				log.Fatal(err)
 			}
+
+			c := new(grid.AOIDetail)
+			err = json.Unmarshal(d, &c)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			fmt.Printf("Successfully created AOI \"%v\" with primary key \"%v\" at %v\n", c.Name, c.Pk, c.CreatedAt)
 		}
 	},
 }

@@ -52,7 +52,7 @@ AOIs.`,
 		}
 		// If there is no primary key provided, we just return a root level listing.
 		if listAOIs {
-			a := new(grid.AOIResponse)
+			a := new(grid.AOIArray)
 			if geom == "" {
 				// get the full list of AOIs
 				b, _, err := g.ListAOIs("")
@@ -69,13 +69,14 @@ AOIs.`,
 				a = b
 			}
 
+			// bi, _ := json.MarshalIndent(a.AOIList, "", "   ")
+			// os.Stdout.Write(bi)
+
 			w := new(tabwriter.Writer)
 			w.Init(os.Stdout, 0, 8, 3, '\t', 0)
 			fmt.Fprintln(w, "PRIMARY KEY\tNAME\tCREATED AT")
-			for _, v := range *a {
-				for _, v := range v.AOIs {
-					fmt.Fprintf(w, "%v\t%v\t%v\n", v.Pk, v.Fields.Name, v.Fields.CreatedAt)
-				}
+			for _, v := range a.AOIList {
+				fmt.Fprintf(w, "%v\t%v\t%v\n", v.Pk, v.Name, v.CreatedAt)
 			}
 			w.Flush()
 		}
@@ -90,23 +91,24 @@ AOIs.`,
 				continue
 			}
 
-			c1 := make(chan *grid.AOIItem)
+			c1 := make(chan *grid.AOIDetail)
 			c2 := make(chan *grid.ExportDetail)
+			// unsure about how to handle errors anymore, as we expect users to be able to supply any type of pk, but GRiD now returns an error if you provide an export pk to the aoi endpoint and vice versa (plus product pks)
 			go func() {
 				// get information on the AOI specified by the given primary key
-				a, _, err := g.GetAOI(pk)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
+				a, _, _ := g.GetAOI(pk)
+				// if err != nil {
+				// 	log.Fatal(err.Error())
+				// }
 
 				c1 <- a
 			}()
 			go func() {
 				// get information on the export specified by the given primary key
-				a, _, err := g.GetExport(pk)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
+				a, _, _ := g.GetExport(pk)
+				// if err != nil {
+				// 	log.Fatal(err.Error())
+				// }
 
 				c2 <- a
 			}()
@@ -114,58 +116,49 @@ AOIs.`,
 			for i := 0; i < 2; i++ {
 				select {
 				case a := <-c1:
-					// In v1 of the API, Success only exists when it is false, i.e., the
-					// query failed.
-					if a.Success == nil {
-						aoi := a.AOIs[0]
-						fmt.Println()
-						fmt.Println("NAME:", aoi.Fields.Name)
-						fmt.Println("CREATED AT:", aoi.Fields.CreatedAt)
-						fmt.Println("\nRASTER COLLECTS")
-						if len(a.RasterCollects) > 0 {
-							w := new(tabwriter.Writer)
-							w.Init(os.Stdout, 0, 8, 3, '\t', 0)
-							fmt.Fprintln(w, "PRIMARY KEY\tNAME\tDATATYPE")
-							for _, vv := range a.RasterCollects {
-								fmt.Fprintf(w, "%v\t%v\t%v\n", vv.Pk, vv.Name, vv.Datatype)
-							}
-							w.Flush()
+					fmt.Println()
+					fmt.Println("NAME:", a.Name)
+					fmt.Println("CREATED AT:", a.CreatedAt)
+					fmt.Println("\nRASTER COLLECTS")
+					if len(a.RasterIntersects) > 0 {
+						w := new(tabwriter.Writer)
+						w.Init(os.Stdout, 0, 8, 3, '\t', 0)
+						fmt.Fprintln(w, "PRIMARY KEY\tNAME\tDATATYPE")
+						for _, vv := range a.RasterIntersects {
+							fmt.Fprintf(w, "%v\t%v\t%v\n", vv.Pk, vv.Name, vv.Datatype)
 						}
-						fmt.Println("\nPOINTCLOUD COLLECTS")
-						if len(a.PointcloudCollects) > 0 {
-							w := new(tabwriter.Writer)
-							w.Init(os.Stdout, 0, 8, 3, '\t', 0)
-							fmt.Fprintln(w, "PRIMARY KEY\tNAME\tDATATYPE")
-							for _, vv := range a.PointcloudCollects {
-								fmt.Fprintf(w, "%v\t%v\t%v\n", vv.Pk, vv.Name, vv.Datatype)
-							}
-							w.Flush()
+						w.Flush()
+					}
+					fmt.Println("\nPOINTCLOUD COLLECTS")
+					if len(a.PointcloudIntersects) > 0 {
+						w := new(tabwriter.Writer)
+						w.Init(os.Stdout, 0, 8, 3, '\t', 0)
+						fmt.Fprintln(w, "PRIMARY KEY\tNAME\tDATATYPE")
+						for _, vv := range a.PointcloudIntersects {
+							fmt.Fprintf(w, "%v\t%v\t%v\n", vv.Pk, vv.Name, vv.Datatype)
 						}
-						fmt.Println("\nEXPORTS")
-						if len(a.ExportSet) > 0 {
-							w := new(tabwriter.Writer)
-							w.Init(os.Stdout, 0, 8, 3, '\t', 0)
-							fmt.Fprintln(w, "PRIMARY KEY\tNAME\tDATATYPE\tSTARTED AT")
-							for _, vv := range a.ExportSet {
-								fmt.Fprintf(w, "%v\t%v\t%v\t%v\n", vv.Pk, vv.Name, vv.Datatype, vv.StartedAt)
-							}
-							w.Flush()
+						w.Flush()
+					}
+					fmt.Println("\nEXPORTS")
+					if len(a.ExportSet) > 0 {
+						w := new(tabwriter.Writer)
+						w.Init(os.Stdout, 0, 8, 3, '\t', 0)
+						fmt.Fprintln(w, "PRIMARY KEY\tNAME\tDATATYPE\tSTARTED AT")
+						for _, vv := range a.ExportSet {
+							fmt.Fprintf(w, "%v\t%v\t%v\t%v\n", vv.Pk, vv.Name, vv.Datatype, vv.StartedAt)
 						}
+						w.Flush()
 					}
 				case b := <-c2:
-					// In v1 of the API, Success only exists when it is false, i.e., the
-					// query failed.
-					if b.Success == nil {
-						if len(b.ExportFiles) > 0 {
-							fmt.Println()
-							w := new(tabwriter.Writer)
-							w.Init(os.Stdout, 0, 8, 3, '\t', 0)
-							fmt.Fprintln(w, "PRIMARY KEY\tNAME")
-							for _, vv := range b.ExportFiles {
-								fmt.Fprintf(w, "%v\t%v\n", vv.Pk, vv.Name)
-							}
-							w.Flush()
+					if len(b.ExportFiles) > 0 {
+						fmt.Println()
+						w := new(tabwriter.Writer)
+						w.Init(os.Stdout, 0, 8, 3, '\t', 0)
+						fmt.Fprintln(w, "PRIMARY KEY\tNAME")
+						for _, vv := range b.ExportFiles {
+							fmt.Fprintf(w, "%v\t%v\n", vv.Pk, vv.Name)
 						}
+						w.Flush()
 					}
 				}
 			}

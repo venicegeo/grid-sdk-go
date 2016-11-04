@@ -65,11 +65,6 @@ func logon() error {
 		return err
 	}
 
-	key, err := readLine("GRiD API Key: ")
-	if err != nil {
-		return err
-	}
-
 	baseURL, err := readLine("GRiD Base URL: ")
 	if err != nil {
 		return err
@@ -84,7 +79,7 @@ func logon() error {
 	auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
 
 	// encode the configuration details as JSON
-	config := grid.Config{Auth: auth, Key: key, URL: baseURL}
+	config := grid.Config{Auth: auth, URL: baseURL}
 	json.NewEncoder(file).Encode(config)
 
 	return nil
@@ -106,41 +101,19 @@ func updateBaseURL(baseURL string) {
 		defer file.Close()
 
 		// encode the configuration details as JSON
-		config := grid.Config{Auth: cfg.Auth, Key: cfg.Key, URL: baseURL}
+		config := grid.Config{Auth: cfg.Auth, URL: baseURL}
 		json.NewEncoder(file).Encode(config)
 	}
 }
 
-// updateBaseURL rewrites the config file, updating only the base URL.
-func updateAPIKey(key string) {
-	cfg, err := grid.GetConfig()
-	if err != nil {
-		err := logon()
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		file, err := grid.CreateConfigFile()
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer file.Close()
-
-		// encode the configuration details as JSON
-		config := grid.Config{Auth: cfg.Auth, Key: key, URL: cfg.URL}
-		json.NewEncoder(file).Encode(config)
-	}
-}
-
-var baseURL, key string
+var baseURL string
 
 func init() {
 	configureCmd.Flags().StringVarP(&baseURL, "base_url", "b", "", "GRiD Base URL")
-	configureCmd.Flags().StringVarP(&key, "key", "k", "", "GRiD API Key")
 }
 
 var configureCmd = &cobra.Command{
-	Use:   "configure [-b base_url][-k key]",
+	Use:   "configure [-b base_url]",
 	Short: "Configure the CLI",
 	Long: `
 Configure the GRiD CLI with the user's GRiD credentials.
@@ -150,8 +123,6 @@ is encoded in the user's config.json file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if baseURL != "" {
 			updateBaseURL(baseURL)
-		} else if key != "" {
-			updateAPIKey(key)
 		} else {
 			err := logon()
 			if err != nil {

@@ -38,6 +38,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 const (
@@ -589,9 +590,9 @@ func (g *Grid) GeneratePointCloudExport(pk int, products []string, options *Gene
 		options = NewGeneratePointCloudExportOptions()
 	}
 	v := url.Values{}
-	for inx := 0; inx < len(products); inx++ {
-		v.Add("products", products[inx])
-	}
+	// should check for empty products
+	prodstr := strings.Join(products, ",")
+	v.Add("products", prodstr)
 	if !options.Compressed {
 		v.Set("compressed", "False")
 	}
